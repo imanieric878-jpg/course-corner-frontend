@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guide - Course Corner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="assets/css/modern-ui.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+        
+    <!-- Firebase Auth -->
+    <script src="assets/js/firebase-config.js" type="module"></script>
+    <script src="assets/js/firebase-auth.js" defer></script>
+    <script src="assets/js/auth-ui.js" defer></script>
+    <script src="assets/js/auth-handlers.js" defer></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .page-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 1.25rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            padding: 1.25rem;
+        }
+
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step {
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1rem;
+            background: #ffffff;
+        }
+
+        .step-title {
+            font-weight: 900;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .step-title i {
+            color: #16a34a;
+        }
+
+        .muted {
+            color: #6b7280;
+        }
+
+        .link-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.75rem;
+        }
+
+        .pill-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 0.85rem;
+            border-radius: 999px;
+            font-weight: 900;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #111827;
+            text-decoration: none;
+        }
+
+        .pill-link:hover {
+            background: #f9fafb;
+            border-color: #bbf7d0;
+        }
+
+        .pill-link i {
+            color: #16a34a;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <header class="modern-header" id="mainHeader">
+        <div class="header-container">
+            <a class='logo' href='index.html'><img src="assets/images/logo.png" alt="Course Corner logo" /><span>Course
+                    Corner</span></a>
+
+            <nav class="nav-desktop">
+                <a class='nav-link' href='index.html'>Home</a>
+                <a class='nav-link' href='about.html'>About Us</a>
+                <a class='nav-link' href='cluster-points.html'>Cluster Guide</a>
+                <a class='nav-link' href='calculator.html'>Calculator</a>
+                <a class='nav-link' href='application.html'>Application</a>
+                <a class='nav-link' href='resources.html'>Resources</a>
+                <a class='nav-link' href='referral.html'>Earn Money</a>
+                <a class='nav-link' href='contact.html'>Contact</a>
+            </nav>
+
+            <div class="nav-actions" style="display: flex; align-items: center; gap: 1rem;">
+                <button id="authBtn" class="cc-btn-login" style="display: flex; align-items: center; gap: 0.5rem; background: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem;" onclick="window.firebaseAuth?.openAuthModal()">
+                    <i class="fas fa-user"></i>
+                    <span>Login</span>
+                </button>
+                <div id="userAvatar" class="hidden"></div>
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+
+        <div class="mobile-menu" id="mobileMenu">
+            <a class='mobile-nav-link' href='index.html'>Home</a>
+            <a class='mobile-nav-link' href='about.html'>About Us</a>
+            <a class='mobile-nav-link' href='cluster-points.html'>Cluster Guide</a>
+            <a class='mobile-nav-link' href='calculator.html'>Calculator</a>
+            <a class='mobile-nav-link' href='application.html'>Application</a>
+            <a class='mobile-nav-link' href='resources.html'>Resources</a>
+            <a class='mobile-nav-link' href='referral.html'>💰 Earn Money</a>
+            <a class='mobile-nav-link' href='contact.html'>Contact</a>
+
+            <div id="userAvatarMobile" class="hidden" style="padding: 1rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;"></div>
+            <button id="authBtnMobile" class="cc-mobile-link" style="width: 100%; text-align: left; color: #16a34a; font-weight: 700;" onclick="window.firebaseAuth?.openAuthModal()">
+                <i class="fas fa-user mr-2"></i> Login
+            </button>
+        </div>
+    </header>
+
+    <main class="page-wrap" style="padding-top: 7rem;">
+        <div class="card">
+            <h1 class="text-2xl font-extrabold text-gray-900">How to Use Course Corner</h1>
+            <p class="muted mt-2">Follow these steps to calculate your points, understand clusters, and download the
+                right documents.</p>
+
+            <div class="step-grid mt-6">
+                <div class="step">
+                    <div class="step-title"><i class="fas fa-calculator"></i> 1) Calculate your points</div>
+                    <p class="muted">Open the calculator, select your KCSE grades, and confirm your overall points.</p>
+                    <div class="link-row">
+                        <a class='pill-link' href='calculator.html'><i class="fas fa-arrow-right"></i> Open
+                            Calculator</a>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><i class="fas fa-layer-group"></i> 2) Check cluster requirements</div>
+                    <p class="muted">Use the Cluster Guide to see which subjects are needed for each cluster (tap to
+                        expand on mobile).</p>
+                    <div class="link-row">
+                        <a class='pill-link' href='cluster-points.html'><i class="fas fa-arrow-right"></i> Open Cluster
+                            Guide</a>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><i class="fas fa-file-pdf"></i> 3) View or download PDFs</div>
+                    <p class="muted">Go to Resources to view documents in your browser or download them for offline use.
+                    </p>
+                    <div class="link-row">
+                        <a class='pill-link' href='resources.html'><i class="fas fa-arrow-right"></i> Open Resources</a>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><i class="fas fa-headset"></i> 4) Get help if stuck</div>
+                    <p class="muted">If you’re unsure what to do next, contact us and we’ll guide you.</p>
+                    <div class="link-row">
+                        <a class='pill-link' href='contact.html'><i class="fas fa-arrow-right"></i> Contact Support</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h2 class="text-xl font-extrabold text-gray-900">Tips</h2>
+                <ul class="mt-2 muted" style="padding-left: 1.25rem; list-style: disc;">
+                    <li>Use the Resources search bar to find a PDF fast.</li>
+                    <li>If a resource is marked Paid, use “Get Access”.</li>
+                    <li>Always confirm KUCCPS dates and updates using official channels.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <!-- WhatsApp Hub Section -->
+    <section class="wa-hub-section">
+        <div class="wa-hub-content">
+            <h2 class="wa-hub-title">Join Our Academic Community</h2>
+            <p class="wa-hub-description">Get instant updates on campus news, application deadlines, and expert career
+                guidance directly on your phone.</p>
+            <div class="wa-hub-btns">
+                <a href="https://chat.whatsapp.com/IiipHgYt5yHL6n126NAKBX" target="_blank" class="btn-wa btn-wa-group">
+                    <i class="fab fa-whatsapp"></i>
+                    Join WhatsApp Group
+                </a>
+                <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank"
+                    class="btn-wa btn-wa-channel">
+                    <i class="fas fa-bell"></i>
+                    Follow WhatsApp Channel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-brand"><img class="footer-logo" src="assets/images/logo.png"
+                            alt="Course Corner logo" /><span>Course Corner</span></div>
+                    <p class="footer-description">Empowering students to make informed decisions about their educational
+                        future through personalized course recommendations.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href='index.html'>Home</a></li>
+                        <li><a href='calculator.html'>Calculator</a></li>
+                        <li><a href='cluster-points.html'>Cluster Guide</a></li>
+                        <li><a href='application.html'>Application Process</a></li>
+                        <li><a href='referral.html'>Earn Money</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href='resources.html'>Resources Library</a></li>
+                        <li><a href='how-to-use.html'>How to Use</a></li>
+                        <li><a href='#'>Privacy Policy</a></li>
+                        <li><a href='#'>Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> imanieric878@gmail.com</li>
+                        <li><i class="fas fa-phone"></i> 0704372636</li>
+                    </ul>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© Course Corner <span id="currentYear"></span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        let isMenuOpen = false;
+
+        function openMobileMenu() {
+            isMenuOpen = true;
+            mobileMenuBtn.classList.add('active');
+            mobileMenu.classList.add('active');
+        }
+
+        function closeMobileMenu() {
+            isMenuOpen = false;
+            mobileMenuBtn.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        }
+
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isMenuOpen) closeMobileMenu();
+            else openMobileMenu();
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => closeMobileMenu());
+        });
+
+        document.addEventListener('click', (e) => {
+            if (isMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024 && isMenuOpen) closeMobileMenu();
+        });
+
+        const header = document.getElementById('mainHeader');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+    </script>
+
+    <!-- Floating Referral Bubble -->
+    <a class='referral-bubble' href='referral.html'>
+        <i class="fas fa-gift"></i>
+        <span>Earn 12%</span>
+    </a>
+    <!-- WhatsApp Floating CTAs -->
+    <div class="wa-floating-container">
+        <a href="https://chat.whatsapp.com/IiipHgYt5yHL6n126NAKBX" target="_blank" class="wa-fab wa-fab-group"
+            title="Join WhatsApp Group">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp Group</span>
+        </a>
+        <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank" class="wa-fab wa-fab-channel"
+            title="Follow WhatsApp Channel">
+            <i class="fas fa-bell"></i>
+            <span>WhatsApp Channel</span>
+        </a>
+    </div>
+    <!-- Authentication Modals removed in favor of dynamic injection from auth-ui.js -->
+</body>
+
+</html>

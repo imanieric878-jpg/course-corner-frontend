@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="manifest" href="site.webmanifest">
+
+    <script src="assets/js/init-swiper.js" defer></script>
+    <!-- Swiper.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Swiper.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <meta name="description"
+        content="Course Corner offers a wide range of courses to help you achieve your educational and career goals. Explore now!">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="assets/js/firebase-config.js" type="module"></script>
+    <script src="assets/js/placement-rules.js"></script>
+    <script src="assets/js/placement-engine.js"></script>
+    <script src="assets/js/calculator.js" type="module"></script>
+    <script src="assets/js/courses-eligibility.js" type="module"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Corner - Calculate Your Cluster Points & Find Eligible Courses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/modern-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/paymentHandler.js"></script>
+    <!-- Feature Card Slider for Mobile -->
+    <script src="assets/js/feature-slider.js" defer></script>
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <script src="assets/js/firebase-auth.js" defer></script>
+    <script src="assets/js/auth-ui.js" defer></script>
+    <script src="assets/js/auth-handlers.js" defer></script>
+
+    <!-- Custom Select for Mobile -->
+    <script src="assets/js/custom-select.js" defer></script>
+
+    <style>
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .blink-button {
+            animation: blink 2s infinite;
+            transition: all 0.3s ease;
+        }
+
+        .blink-button:hover {
+            animation: none;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pop-animation {
+            animation: pop 0.3s ease-out;
+        }
+
+        /* Hero Image Styling */
+        .hero-section {
+            position: relative;
+            height: 80vh;
+            overflow: hidden;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 130%;
+            object-fit: 100%, 100%;
+        }
+
+        .imagec {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+        }
+
+        /* Career Path Cards */
+        .career-path-section {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+
+
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .flip-card {
+            width: 280px;
+            height: 300px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .flip-card-front {
+            background-color: white;
+            color: #16a34a;
+        }
+
+        .flip-card-back {
+            background-color: #16a34a;
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .flip-card {
+                width: 100%;
+                max-width: 280px;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #mobile-menu {
+                background-color: #f8f9fa;
+            }
+        }
+
+        body.loading {
+            overflow: hidden;
+            visibility: hidden;
+        }
+
+        body.loading #preloader {
+            visibility: visible;
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background-color: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 loading">
+    <!-- Preloader -->
+
+
+    <div id="preloader" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <div class="text-center mb-4">
+            <h2 class="text-3xl font-bold text-green-600 mb-2 animate-fade-in">Welcome to</h2>
+            <h1 class="text-4xl font-bold text-green-600 animate-fade-in-delay">Course Corner</h1>
+            <br>
+            <p class="text-2xl  text-green-600 mb-2 animate-fade-in">Your career path starts here</p>
+        </div>
+        <div class="loader mt-4"></div>
+    </div>
+
+    <!-- Modern Sticky Navigation -->
+    <header class="modern-header" id="mainHeader">
+        <div class="header-container">
+            <!-- Logo -->
+            <a class='logo-container' href='index.html'>
+                <img src="assets/images/logo.png" alt="Course Corner logo" />
+                <span class="logo-text">Course Corner</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="desktop-nav">
+                <div class="nav-links">
+                    <a class='modern-nav-link active' href='index.html'>Home</a>
+                    <a class='modern-nav-link' href='about.html'>About Us</a>
+                    <a class='modern-nav-link' href='cluster-points.html'>Cluster Guide</a>
+                    <a class='modern-nav-link' href='calculator.html'>Calculator</a>
+                    <a class='modern-nav-link' href='application.html'>Application</a>
+                    <a class='modern-nav-link' href='resources.html'>Resources</a>
+                    <a class='nav-link' href='referral.html'>Earn Money</a>
+                    <a class='nav-link' href='contact.html'>Contact</a>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="nav-auth-buttons">
+                    <div id="userAvatar" class="hidden"></div>
+                    <a class='btn-nav-profile hidden' href='calculator.html' id='profileBtn'>
+                        <i class="fas fa-gift"></i>
+                        <span>My Dashboard</span>
+                    </a>
+                    <button id="authBtn" class="btn-nav-login" onclick="window.firebaseAuth.openAuthModal()">
+                        <i class="fas fa-user"></i>
+                        <span>Login</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav-links">
+                <a class='mobile-nav-link active' href='index.html'>Home</a>
+                <a class='mobile-nav-link' href='about.html'>About Us</a>
+                <a class='mobile-nav-link' href='cluster-points.html'>Cluster Guide</a>
+                <a class='mobile-nav-link' href='calculator.html'>Calculator</a>
+                <a class='mobile-nav-link' href='application.html'>Application</a>
+                <a class='mobile-nav-link' href='resources.html'>Resources</a>
+                <a class='mobile-nav-link' href='referral.html'>💰 Earn Money</a>
+                <a class='mobile-nav-link' href='contact.html'>Contact</a>
+            </nav>
+            <div class="mobile-auth-buttons">
+                <div id="userAvatarMobile" class="hidden mb-4"></div>
+                <a class='btn-nav-profile hidden' href='calculator.html' id='profileBtnMobile'
+                    style='width:100%; justify-content:center; text-decoration:none;'>
+                    <i class="fas fa-gift"></i>
+                    My Dashboard
+                </a>
+                <button id="authBtnMobile" class="btn-nav-login" style="width:100%; justify-content:center;"
+                    onclick="window.firebaseAuth.openAuthModal()">
+                    <i class="fas fa-user"></i>
+                    Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modern Hero Section -->
+    <section class="modern-hero">
+        <!-- Video Background -->
+        <video autoplay muted loop playsinline class="hero-video-bg">
+            <source src="assets/images/sam-landing.mp4" type="video/mp4">
+        </video>
+    </section>
+
+
+    <style>
+        /* Modern Button Section Styles */
+        .modern-cta-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .modern-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+            position: relative;
+            overflow: hidden;
+            flex: 0 1 auto;
+            max-width: 280px;
+            min-width: 180px;
+        }
+
+        .modern-cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .modern-cta-btn:hover::before {
+            left: 100%;
+        }
+
+        .modern-cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+        }
+
+        .modern-cta-btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-packages {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+        }
+
+        .btn-calculator {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+        }
+
+        .modern-cta-btn i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 480px) {
+
+            /* Button section improvements */
+            .modern-cta-buttons {
+                padding: 1.5rem 1rem;
+                gap: 0.75rem;
+            }
+
+            .modern-cta-btn {
+                padding: 0.875rem 1.25rem;
+                font-size: 0.875rem;
+                min-width: 140px;
+                max-width: 48%;
+                flex: 1;
+            }
+
+            .modern-cta-btn i {
+                font-size: 1rem;
+            }
+
+            .glow-btn {
+                width: 100%;
+                font-size: 1rem;
+                padding: 1rem 0.5rem;
+                margin: 0 auto;
+                box-shadow: 0 0 16px 2px #16a34a55;
+            }
+
+            .flex-1 {
+                min-width: 0;
+            }
+
+            .my-8 {
+                margin-top: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .sm\:flex-row {
+                flex-direction: column !important;
+            }
+
+            /* Prevent section overlapping */
+            section {
+                margin-bottom: 1rem !important;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            /* Features section spacing */
+            .features-section {
+                padding-top: 2rem !important;
+                padding-bottom: 2rem !important;
+                margin-top: 1rem !important;
+            }
+
+            /* Section headers */
+            .section-header {
+                padding: 0 1rem;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .section-title {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+
+            .section-subtitle {
+                font-size: 0.875rem !important;
+            }
+
+            /* Wave separator adjustments */
+            .wave-separator {
+                margin: 0 !important;
+                height: 60px;
+            }
+
+            /* CTA section spacing */
+            .cta-section {
+                padding: 2rem 1rem !important;
+                margin-top: 1rem !important;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .modern-cta-btn {
+                max-width: 240px;
+                min-width: 200px;
+            }
+        }
+
+        .glow-btn {
+            box-shadow: 0 0 24px 2px #16a34a55, 0 2px 8px #16a34a33;
+        }
+    </style>
+
+    <div class="wave-separator wave-separator--between" aria-hidden="true">
+        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#f9fafb" fill-opacity="1"
+                d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,58.7C960,64,1056,64,1152,58.7C1248,53,1344,43,1392,37.3L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z">
+            </path>
+        </svg>
+    </div>
+
+
+    <!-- Modern Two Column Buttons Section (Packages) -->
+    <section class="modern-cta-buttons"
+        style="grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 0 auto; gap: 1rem;">
+        <a class='modern-cta-btn btn-packages' href='calculator.html'>
+            <i class="fas fa-box-open"></i>
+            <span>Our Packages</span>
+        </a>
+        <a class='modern-cta-btn btn-calculator' href='calculator.html'>
+            <i class="fas fa-calculator"></i>
+            <span>Calculator</span>
+        </a>
+    </section>
+
+
+    <!-- Modern Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <div class="section-header">
+                <h2 class="section-title">Your Path to Success</h2>
+                <p class="section-subtitle">Four simple steps to discover your ideal career path and university
+                    placement</p>
+            </div>
+            <!-- Desktop grid layout -->
+            <div class="features-grid">
+                <!-- Feature Card 0: Enter Grades -->
+                <div class="modern-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="feature-title">Enter Grades</h3>
+                    <p class="feature-description">Input your KCSE grades to start the evaluation</p>
+                </div>
+                <!-- Feature Card 1 -->
+                <div class="modern-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-compass"></i>
+                    </div>
+                    <h3 class="feature-title">Explore Courses</h3>
+                    <p class="feature-description">Discover courses that match your interests and goals</p>
+                </div>
+                <!-- Feature Card 2 -->
+                <div class="modern-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3 class="feature-title">Find Universities</h3>
+                    <p class="feature-description">Compare universities offering your chosen courses</p>
+                </div>
+                <!-- Feature Card 3 -->
+                <div class="modern-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="feature-title">Make Decision</h3>
+                    <p class="feature-description">Choose your path with confidence and clarity</p>
+                </div>
+            </div>
+
+
+            <!-- Mobile slider layout -->
+            <div class="features-slider-mobile">
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Feature Card 0: Enter Grades -->
+                        <div class="swiper-slide">
+                            <div class="modern-feature-card">
+                                <div class="feature-icon-wrapper">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <h3 class="feature-title">Enter Grades</h3>
+                                <p class="feature-description">Input your KCSE grades to start the evaluation</p>
+                            </div>
+                        </div>
+                        <!-- Feature Card 1 -->
+                        <div class="swiper-slide">
+                            <div class="modern-feature-card">
+                                <div class="feature-icon-wrapper">
+                                    <i class="fas fa-compass"></i>
+                                </div>
+                                <h3 class="feature-title">Explore Courses</h3>
+                                <p class="feature-description">Discover courses that match your interests</p>
+                            </div>
+                        </div>
+                        <!-- Feature Card 2 -->
+                        <div class="swiper-slide">
+                            <div class="modern-feature-card">
+                                <div class="feature-icon-wrapper">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <h3 class="feature-title">Find Universities</h3>
+                                <p class="feature-description">Compare universities offering your chosen courses</p>
+                            </div>
+                        </div>
+                        <!-- Feature Card 3 -->
+                        <div class="swiper-slide">
+                            <div class="modern-feature-card">
+                                <div class="feature-icon-wrapper">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h3 class="feature-title">Make Decision</h3>
+                                <p class="feature-description">Choose your path with confidence and clarity</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Add Arrows -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- Calculator CTA Section -->
+    <section class="cta-section" id="calculator-cta">
+        <div class="cta-container">
+            <div class="cta-content">
+                <div class="cta-badge">
+                    <i class="fas fa-star"></i>
+                    <span>Start Your Journey</span>
+                </div>
+                <h2 class="cta-title">Ready to Calculate Your <span class="highlight">Cluster Points?</span></h2>
+                <p class="cta-description">
+                    Input your KCSE grades and instantly discover your cluster points, eligible courses, and university
+                    options.
+                    Our comprehensive calculator covers all subject combinations and provides accurate results based on
+                    the latest KUCCPS guidelines.
+                </p>
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Instant Results</span>
+                    </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>All Subject Groups</span>
+                    </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Course Recommendations</span>
+                    </div>
+                </div>
+                <a class='cta-button' href='calculator.html'>
+                    <i class="fas fa-calculator"></i>
+                    Open Calculator
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="cta-visual">
+                <div class="cta-card">
+                    <div class="cta-card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Sample Result</span>
+                    </div>
+                    <div class="cta-card-body">
+                        <div class="cta-score">
+                            <span class="score-number">72</span>
+                            <span class="score-label">/ 84 Points</span>
+                        </div>
+                        <div class="cta-courses">
+                            <div class="course-tag">Medicine</div>
+                            <div class="course-tag">Engineering</div>
+                            <div class="course-tag">Law</div>
+                            <div class="course-tag">+50 more</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // ========================================
+        // REFERRAL CODE CAPTURE (supports both ?ref= and #ref=)
+        // ========================================
+        (function () {
+            // Check query params first
+            let refCode = new URLSearchParams(window.location.search).get('ref');
+
+            // If not in query, check hash (e.g., #ref=XXXXX)
+            if (!refCode && window.location.hash) {
+                const hashParams = window.location.hash.substring(1); // Remove #
+                if (hashParams.startsWith('ref=')) {
+                    refCode = hashParams.split('=')[1];
+                }
+            }
+
+            if (refCode) {
+                localStorage.setItem('pendingReferralCode', refCode.toUpperCase());
+                console.log('📌 Referral code captured:', refCode);
+
+                // Optional: Show referral banner
+                setTimeout(() => {
+                    const banner = document.createElement('div');
+                    banner.id = 'referralBanner';
+                    banner.className = 'fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500 to-yellow-500 text-white py-2 px-4 text-center text-sm font-medium shadow-lg';
+                    banner.innerHTML = `
+                        <span><i class="fas fa-gift mr-2"></i>You were referred by a friend! Your discount will be applied.</span>
+                        <button onclick="this.parentElement.remove()" class="ml-4 text-white/80 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    document.body.prepend(banner);
+
+                    // Auto-hide after 10 seconds
+                    setTimeout(() => {
+                        const b = document.getElementById('referralBanner');
+                        if (b) b.remove();
+                    }, 10000);
+                }, 1000);
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modern Header Scroll Effect
+            const header = document.getElementById('mainHeader');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            let isMenuOpen = false;
+
+            function openMobileMenu() {
+                isMenuOpen = true;
+                mobileMenuBtn.classList.add('active');
+                mobileMenu.classList.add('show');
+            }
+
+            function closeMobileMenu() {
+                isMenuOpen = false;
+                mobileMenuBtn.classList.remove('active');
+                mobileMenu.classList.remove('show');
+            }
+
+            function toggleMobileMenu() {
+                if (isMenuOpen) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
+
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+
+            // Close mobile menu when clicking a link
+            mobileMenu.querySelectorAll('a, button').forEach(link => {
+                link.addEventListener('click', () => {
+                    closeMobileMenu();
+                });
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (isMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Close mobile menu when window is resized to desktop size
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024 && isMenuOpen) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Close mobile menu on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isMenuOpen) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Update score display when grades change
+            document.querySelectorAll('.modern-grade-select, .grade-select').forEach(select => {
+                select.addEventListener('change', function () {
+                    // Add visual feedback when a grade is selected
+                    if (this.value) {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                    // Update the overall grade display
+                    updateOverallGradeDisplay();
+                });
+            });
+
+            function updateOverallGradeDisplay() {
+                const overallGrade = document.getElementById('overallGrade');
+                const display = document.getElementById('overallGradeDisplay');
+                if (overallGrade && display) {
+                    display.textContent = overallGrade.value || '0';
+                }
+            }
+        });
+    </script>
+
+    <!-- Referral Program Section -->
+    <section class="referral-section" id="referral-program">
+        <div class="referral-section-container">
+            <div class="referral-content">
+                <div class="referral-badge">
+                    <i class="fas fa-gift"></i>
+                    <span>Referral Program</span>
+                </div>
+                <h2 class="referral-title">Earn Money by <span class="highlight">Referring Friends</span></h2>
+                <p class="referral-description">
+                    Share Course Corner with your friends and earn <strong>12% commission</strong> on every payment they
+                    make!
+                    Generate your unique referral code, share it, and watch your earnings grow.
+                </p>
+                <div class="referral-features">
+                    <div class="referral-feature">
+                        <i class="fas fa-percentage"></i>
+                        <span>12% Commission</span>
+                    </div>
+                    <div class="referral-feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited Referrals</span>
+                    </div>
+                    <div class="referral-feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>Instant Tracking</span>
+                    </div>
+                </div>
+                <a class='referral-cta-button' href='referral.html' id='homeReferralBtn'>
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Start Earning Now
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="referral-visual">
+                <div class="referral-card">
+                    <div class="referral-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="referral-card-content">
+                        <div class="referral-stat">
+                            <span class="stat-big">12%</span>
+                            <span class="stat-desc">of every payment</span>
+                        </div>
+                        <div class="referral-steps-mini">
+                            <div class="step-mini"><i class="fas fa-key"></i> Get Code</div>
+                            <div class="step-mini"><i class="fas fa-share-alt"></i> Share</div>
+                            <div class="step-mini"><i class="fas fa-coins"></i> Earn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Referral Section Styles */
+        .referral-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .referral-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(22, 163, 74, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .referral-section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (min-width: 1024px) {
+            .referral-section-container {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .referral-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(22, 163, 74, 0.15);
+            color: #15803d;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .referral-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        @media (min-width: 768px) {
+            .referral-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        .referral-title .highlight {
+            color: #16a34a;
+        }
+
+        .referral-description {
+            font-size: 1.0625rem;
+            color: #4b5563;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .referral-description strong {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .referral-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .referral-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9375rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .referral-feature i {
+            color: #16a34a;
+        }
+
+        .referral-cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+        }
+
+        .referral-cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(22, 163, 74, 0.4);
+        }
+
+        .referral-visual {
+            display: flex;
+            justify-content: center;
+        }
+
+        .referral-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 320px;
+            position: relative;
+        }
+
+        .referral-card::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, #16a34a, #22c55e, #16a34a);
+            border-radius: 1.6rem;
+            z-index: -1;
+        }
+
+        .referral-card-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .referral-card-icon i {
+            font-size: 1.75rem;
+            color: #16a34a;
+        }
+
+        .referral-stat {
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-big {
+            display: block;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #16a34a;
+            line-height: 1;
+        }
+
+        .stat-desc {
+            font-size: 0.9375rem;
+            color: #6b7280;
+        }
+
+        .referral-steps-mini {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .step-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .step-mini i {
+            width: 36px;
+            height: 36px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #16a34a;
+            font-size: 0.875rem;
+        }
+
+        /* Floating Referral Bubble */
+        .referral-bubble {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 0.875rem 1.25rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(22, 163, 74, 0.4);
+            transition: all 0.3s ease;
+            animation: bubble-pulse 2s infinite;
+        }
+
+        .referral-bubble:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(22, 163, 74, 0.5);
+            animation: none;
+        }
+
+        .referral-bubble i {
+            font-size: 1.1rem;
+        }
+
+        @keyframes bubble-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .referral-bubble {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .referral-bubble span {
+                display: none;
+            }
+
+            .referral-bubble {
+                width: 56px;
+                height: 56px;
+                padding: 0;
+                justify-content: center;
+                border-radius: 50%;
+            }
+        }
+    </style>
+
+    <!-- Floating Referral Bubble -->
+    <a class='referral-bubble' href='referral.html'>
+        <i class="fas fa-gift"></i>
+        <span>Earn 12%</span>
+    </a>
+
+
+    <!-- WhatsApp Hub Section -->
+    <section class="wa-hub-section">
+        <div class="wa-hub-content">
+            <h2 class="wa-hub-title">Join Our Academic Community</h2>
+            <p class="wa-hub-description">Get instant updates on KUCCPS, HELB, and scholarship opportunities directly on
+                your phone.</p>
+            <div class="wa-hub-btns">
+                <a href="https://wa.me/254704372636" target="_blank" class="btn-wa btn-wa-group">
+                    <i class="fab fa-whatsapp"></i>
+                    Join WhatsApp Group
+                </a>
+                <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank"
+                    class="btn-wa btn-wa-channel">
+                    <i class="fas fa-bell"></i>
+                    Follow WhatsApp Channel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp Floating CTAs -->
+    <div class="wa-floating-container">
+        <a href="https://wa.me/254704372636" target="_blank" class="wa-fab wa-fab-group"
+            title="Join WhatsApp Group">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp Group</span>
+        </a>
+        <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank" class="wa-fab wa-fab-channel"
+            title="Follow WhatsApp Channel">
+            <i class="fas fa-bell"></i>
+            <span>WhatsApp Channel</span>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Brand -->
+                <div class="footer-col">
+                    <div class="footer-brand">
+                        <img class="footer-logo" src="assets/images/logo.png" alt="Course Corner logo" />
+                        <span>Course Corner</span>
+                    </div>
+                    <p class="footer-description">
+                        Empowering students to make informed decisions about their educational future through
+                        personalized course recommendations.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" target="_blank"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href='index.html'>Home</a></li>
+                        <li><a href='calculator.html'>Calculator</a></li>
+                        <li><a href='cluster-points.html'>Cluster Points Guide</a></li>
+                        <li><a href='application.html'>Application Process</a></li>
+                        <li><a href='referral.html'>Earn Money</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources -->
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href='resources.html'>Resources Library</a></li>
+                        <li><a href='how-to-use.html'>How to Use</a></li>
+                        <li><a href='#'>Privacy Policy</a></li>
+                        <li><a href='#'>Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Us -->
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> imanieric878@gmail.com</li>
+                        <li><i class="fas fa-phone"></i> 0704 372636</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                <p>© Course Corner <span id="currentYear"></span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update copyright year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // 3D Tilt Effect for Hero Elements
+        document.addEventListener('DOMContentLoaded', function () {
+            const tiltElements = document.querySelectorAll('[data-tilt]');
+
+            tiltElements.forEach(element => {
+                element.addEventListener('mousemove', function (e) {
+                    const rect = element.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+
+                    element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px) scale(1.05)`;
+                });
+
+                element.addEventListener('mouseleave', function () {
+                    element.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0) scale(1)';
+                });
+            });
+        });
+    </script>
+
+    <!-- Preloader -->
+    <script>
+        window.addEventListener('load', function () {
+            const preloader = document.getElementById('preloader');
+            const body = document.body;
+
+            setTimeout(() => {
+                body.classList.remove('loading');
+                preloader.classList.add('fade-out');
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            }, 10);
+        });
+    </script>
+
+    <!-- Reveal on scroll -->
+    <script>
+        const observerOptions = {
+            root: null,
+            threshold: 0.1,
+            rootMargin: "0px"
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Add reveal class to elements you want to animate
+        document.querySelectorAll('.reveal').forEach((element) => {
+            observer.observe(element);
+        });
+    </script>
+
+    <script>
+        // Add event listeners to all grade selects
+        document.querySelectorAll('.grade-select').forEach(select => {
+            select.addEventListener('change', calculateTotalPoints);
+        });
+
+        function calculateTotalPoints() {
+            let total = 0;
+            const scores = {};
+
+            // Get all selected grades
+            document.querySelectorAll('.grade-select').forEach(select => {
+                if (select.value) {
+                    scores[select.id] = parseInt(select.value);
+                }
+            });
+
+            // Count total subjects selected
+            const totalSubjectsSelected = Object.keys(scores).length;
+
+            // Reset the input field if less than 7 subjects
+            if (totalSubjectsSelected < 7) {
+                document.getElementById('overallGrade').value = "";
+                return;
+            }
+
+            // 1. Mathematics (compulsory)
+            if (!scores.mathematics) {
+                document.getElementById('overallGrade').value = "";
+                return;
+            }
+            total += scores.mathematics;
+
+            // 2. Find best performing language
+            const languages = ['english', 'kiswahili', 'french', 'german', 'arabic', 'signLanguage'];
+            const languageScores = languages
+                .filter(lang => scores[lang])
+                .map(lang => ({ subject: lang, score: scores[lang] }));
+
+            if (languageScores.length === 0) {
+                document.getElementById('overallGrade').value = "";
+                return;
+            }
+
+            const bestLanguage = languageScores.reduce((best, current) =>
+                current.score > best.score ? current : best
+            );
+            total += bestLanguage.score;
+
+            // 3. Get all remaining subjects (excluding mathematics and best language)
+            const remainingSubjects = Object.entries(scores)
+                .filter(([subject]) =>
+                    subject !== 'mathematics' &&
+                    subject !== bestLanguage.subject
+                )
+                .map(([subject, score]) => ({ subject, score }))
+                .sort((a, b) => b.score - a.score); // Sort by score descending
+
+            // 4. Take the best 5 remaining subjects
+            const bestFiveRemaining = remainingSubjects.slice(0, 5);
+            bestFiveRemaining.forEach(subject => {
+                total += subject.score;
+            });
+
+            // Update the overallGrade input
+            document.getElementById('overallGrade').value = total;
+
+            // Remove this line to prevent automatic showing of results
+            // document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Old button listeners removed - Payment is now required first
+    </script>
+
+    <!-- Add this script after the existing scripts -->
+    <script>
+        // Make the grade function globally available
+        function get_grade_from_points(points) {
+            if (points >= 81) return "A"
+            else if (points >= 74) return "A-"
+            else if (points >= 67) return "B+"
+            else if (points >= 60) return "B"
+            else if (points >= 53) return "B-"
+            else if (points >= 46) return "C+"
+            else if (points >= 39) return "C"
+            else if (points >= 32) return "C-"
+            else if (points >= 25) return "D+"
+            else if (points >= 18) return "D"
+            else if (points >= 11) return "D-"
+            else return "E"
+        }
+
+        // Then your existing initializeDownloadButton function
+        function initializeDownloadButton() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', async function () {
+                    try {
+                        // Prompt for student name
+                        const studentName = await Swal.fire({
+                            title: 'Enter your name',
+                            input: 'text',
+                            inputLabel: 'Your name will appear on the PDF report',
+                            inputPlaceholder: 'Enter your full name',
+                            showCancelButton: true,
+                            inputValidator: (value) => {
+                                if (!value) {
+                                    return 'Please enter your name!';
+                                }
+                            }
+                        });
+
+                        if (studentName.isConfirmed) {
+                            // Get student info
+                            const studentPoints = parseInt(document.getElementById('overallGrade').value);
+                            const grade = get_grade_from_points(studentPoints);
+
+                            // Initialize jsPDF
+                            const doc = new jspdf.jsPDF();
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            const pageHeight = doc.internal.pageSize.getHeight();
+
+                            // Add watermark
+                            doc.setTextColor(230, 230, 230);
+                            doc.setFontSize(60);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text('Course Corner', pageWidth / 2, pageHeight / 2, {
+                                align: 'center',
+                                angle: 45
+                            });
+
+                            // Add green header banner
+                            doc.setFillColor(34, 197, 94);
+                            doc.rect(0, 0, pageWidth, 20, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.setFontSize(16);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text('Course Corner', pageWidth / 2, 13, { align: 'center' });
+
+                            // Add student info section with border
+                            doc.setDrawColor(200, 200, 200);
+                            doc.setLineWidth(0.5);
+                            doc.rect(10, 25, pageWidth - 20, 25);
+                            doc.setTextColor(0, 0, 0);
+                            doc.setFontSize(12);
+                            doc.text(`Student Name: ${studentName.value}`, 15, 35);
+                            doc.text(`Total Points: ${studentPoints}`, 15, 42);
+                            doc.text(`Overall Grade: ${grade}`, pageWidth / 2, 42);
+
+                            // Cluster Points Section with pink theme
+                            let yPos = 60;
+                            doc.setFillColor(249, 168, 212); // Pink background
+                            doc.rect(10, yPos, pageWidth - 20, 15, 'F');
+                            doc.setTextColor(0, 0, 0);
+                            doc.setFontSize(14);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text('Cluster Points', 15, yPos + 10);
+                            yPos += 20;
+
+                            // Add cluster points with consistent formatting
+                            doc.setFont('helvetica', 'normal');
+                            doc.setFontSize(10);
+                            const clusterPoints = window.lastClusterPoints;
+                            if (clusterPoints) {
+                                Object.entries(clusterPoints).forEach(([clusterName, points]) => {
+                                    const clusterNumber = clusterName.split(' ')[1];
+                                    doc.text(`cluster ${clusterNumber} - ${points.toFixed(4)}`, 15, yPos);
+                                    yPos += 7;
+                                });
+                            }
+
+                            // Add divider
+                            yPos += 10;
+                            doc.setDrawColor(200, 200, 200);
+                            doc.line(10, yPos, pageWidth - 10, yPos);
+                            yPos += 15;
+
+                            // Courses Section with colored sections
+                            const sections = document.querySelectorAll('.collapsible-header');
+                            if (sections && sections.length > 0) {
+                                sections.forEach((section, index) => {
+                                    // Set color based on section type
+                                    let sectionColor;
+                                    const title = section.querySelector('h3')?.textContent || '';
+                                    if (title.includes('Degree')) {
+                                        sectionColor = [34, 197, 94]; // Green
+                                    } else if (title.includes('Diploma')) {
+                                        sectionColor = [59, 130, 246]; // Blue
+                                    } else if (title.includes('Certificate')) {
+                                        sectionColor = [139, 92, 246]; // Purple
+                                    } else {
+                                        sectionColor = [249, 115, 22]; // Orange
+                                    }
+
+                                    // Section header with color
+                                    doc.setFillColor(...sectionColor);
+                                    doc.rect(10, yPos, pageWidth - 20, 10, 'F');
+                                    doc.setTextColor(255, 255, 255);
+                                    doc.setFontSize(12);
+                                    doc.setFont('helvetica', 'bold');
+                                    doc.text(title, 15, yPos + 7);
+                                    yPos += 15;
+
+                                    // Course listings in table format
+                                    doc.setTextColor(0, 0, 0);
+                                    doc.setFontSize(10);
+                                    doc.setFont('helvetica', 'normal');
+
+                                    const coursesList = section.nextElementSibling?.querySelectorAll('li') || [];
+                                    coursesList.forEach(course => {
+                                        if (yPos >= pageHeight - 20) {
+                                            doc.addPage();
+                                            yPos = 20;
+                                        }
+                                        doc.text('✓', 15, yPos);
+                                        doc.text(course.textContent.trim(), 25, yPos);
+                                        yPos += 7;
+                                    });
+
+                                    yPos += 10;
+                                });
+                            }
+
+                            // Add footer
+                            doc.setTextColor(128, 128, 128);
+                            doc.setFontSize(8);
+                            doc.text('© Course Corner 2025', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+                            // Save the PDF
+                            const fileName = `${studentName.value.replace(/\s+/g, '_')}_report.pdf`;
+                            doc.save(fileName);
+
+                            // Show success message with confirmation button
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'PDF Generated!',
+                                text: 'Your complete report has been downloaded.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#16a34a',  // Green color to match your theme
+                                allowOutsideClick: true,
+                                showConfirmButton: true
+                            });
+                        }
+                    } catch (error) {
+                        console.error('PDF generation error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'Failed to generate PDF. Please try again.'
+                        });
+                    }
+                });
+            }
+        }
+    </script>
+
+    <!-- Add this script right before the closing </body> tag -->
+    <script>
+        async function handleDownload() {
+            try {
+                // First check if points are calculated
+                const overallGrade = document.getElementById('overallGrade');
+                if (!overallGrade || !overallGrade.value) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please calculate your cluster points first'
+                    });
+                    return;
+                }
+
+                const resultsDiv = document.getElementById('results');
+                if (!resultsDiv) {
+                    throw new Error('Results section not found');
+                }
+
+                // Get student name
+                const studentName = await Swal.fire({
+                    title: 'Enter your name',
+                    input: 'text',
+                    inputLabel: 'Your name will appear on the PDF report',
+                    inputPlaceholder: 'Enter your full name',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Please enter your name!';
+                        }
+                    }
+                });
+
+                if (studentName.isConfirmed) {
+                    // Show loading
+                    const loadingAlert = Swal.fire({
+                        title: 'Generating PDF',
+                        text: 'Please wait...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Expand all sections
+                    const collapsibles = document.querySelectorAll('.collapsible-content');
+                    collapsibles.forEach(content => content.classList.remove('hidden'));
+
+                    // Create PDF
+                    const doc = new jspdf.jsPDF();
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+
+                    // Add watermark
+                    doc.setTextColor(230, 230, 230);
+                    doc.setFontSize(60);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Course Corner', pageWidth / 2, pageHeight / 2, {
+                        align: 'center',
+                        angle: 45
+                    });
+
+                    // Add green header banner
+                    doc.setFillColor(34, 197, 94);
+                    doc.rect(0, 0, pageWidth, 20, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Course Corner', pageWidth / 2, 13, { align: 'center' });
+
+                    // Add student info section with border
+                    doc.setDrawColor(200, 200, 200);
+                    doc.setLineWidth(0.5);
+                    doc.rect(10, 25, pageWidth - 20, 25);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(12);
+                    doc.text(`Student Name: ${studentName.value}`, 15, 35);
+                    doc.text(`Total Points: ${overallGrade.value}`, 15, 42);
+                    doc.text(`Overall Grade: ${get_grade_from_points(parseInt(overallGrade.value))}`, pageWidth / 2, 42);
+
+                    // Cluster Points Section with pink theme
+                    let yPos = 60;
+                    doc.setFillColor(249, 168, 212); // Pink background
+                    doc.rect(10, yPos, pageWidth - 20, 15, 'F');
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Cluster Points', 15, yPos + 10);
+                    yPos += 20;
+
+                    // Add cluster points with consistent formatting
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                    const clusterPoints = window.lastClusterPoints;
+                    if (clusterPoints) {
+                        Object.entries(clusterPoints).forEach(([clusterName, points]) => {
+                            const clusterNumber = clusterName.split(' ')[1];
+                            doc.text(`cluster ${clusterNumber} - ${points.toFixed(4)}`, 15, yPos);
+                            yPos += 7;
+                        });
+                    }
+
+                    // Add divider
+                    yPos += 10;
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(10, yPos, pageWidth - 10, yPos);
+                    yPos += 15;
+
+                    // Courses Section with colored sections
+                    const sections = document.querySelectorAll('.collapsible-header');
+                    if (sections && sections.length > 0) {
+                        sections.forEach((section, index) => {
+                            // Set color based on section type
+                            let sectionColor;
+                            const title = section.querySelector('h3')?.textContent || '';
+                            if (title.includes('Degree')) {
+                                sectionColor = [34, 197, 94]; // Green
+                            } else if (title.includes('Diploma')) {
+                                sectionColor = [59, 130, 246]; // Blue
+                            } else if (title.includes('Certificate')) {
+                                sectionColor = [139, 92, 246]; // Purple
+                            } else {
+                                sectionColor = [249, 115, 22]; // Orange
+                            }
+
+                            // Section header with color
+                            doc.setFillColor(...sectionColor);
+                            doc.rect(10, yPos, pageWidth - 20, 10, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.setFontSize(12);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(title, 15, yPos + 7);
+                            yPos += 15;
+
+                            // Course listings in table format
+                            doc.setTextColor(0, 0, 0);
+                            doc.setFontSize(10);
+                            doc.setFont('helvetica', 'normal');
+
+                            const coursesList = section.nextElementSibling?.querySelectorAll('li') || [];
+                            coursesList.forEach(course => {
+                                if (yPos >= pageHeight - 20) {
+                                    doc.addPage();
+                                    yPos = 20;
+                                }
+                                doc.text('✓', 15, yPos);
+                                doc.text(course.textContent.trim(), 25, yPos);
+                                yPos += 7;
+                            });
+
+                            yPos += 10;
+                        });
+                    }
+
+                    // Add footer
+                    doc.setTextColor(128, 128, 128);
+                    doc.setFontSize(8);
+                    doc.text('© Course Corner 2025', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+                    // Save the PDF
+                    const fileName = `${studentName.value.replace(/\s+/g, '_')}_report.pdf`;
+                    doc.save(fileName);
+
+                    // Close loading alert before showing success message
+                    await loadingAlert.close();
+
+                    // Show success message with confirmation button
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'PDF Generated!',
+                        text: 'Your complete report has been downloaded.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#16a34a',  // Green color to match your theme
+                        allowOutsideClick: true,
+                        showConfirmButton: true
+                    });
+                }
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to generate PDF. Please try again.'
+                });
+            }
+        }
+
+        // Add click handler to the third button
+        document.getElementById('calculateBtn3').addEventListener('click', function () {
+            setTimeout(() => {
+                const downloadBtn = document.getElementById('downloadBtn');
+                if (downloadBtn) {
+                    downloadBtn.removeEventListener('click', handleDownload);
+                    downloadBtn.addEventListener('click', handleDownload);
+                }
+            }, 1000);
+        });
+    </script>
+
+    <!-- Add this new function for handling courses-only download -->
+    <script>
+        async function handleCoursesOnlyDownload() {
+            try {
+                // Get student name
+                const studentName = await Swal.fire({
+                    title: 'Enter your name',
+                    input: 'text',
+                    inputLabel: 'Your name will appear on the PDF report',
+                    inputPlaceholder: 'Enter your full name',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Please enter your name!';
+                        }
+                    }
+                });
+
+                if (studentName.isConfirmed) {
+                    // Show loading
+                    const loadingAlert = Swal.fire({
+                        title: 'Generating PDF',
+                        text: 'Please wait...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Create PDF
+                    const doc = new jspdf.jsPDF();
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+
+                    // Add watermark
+                    doc.setTextColor(230, 230, 230);
+                    doc.setFontSize(60);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Course Corner', pageWidth / 2, pageHeight / 2, {
+                        align: 'center',
+                        angle: 90
+                    });
+
+                    // Add green header banner
+                    doc.setFillColor(34, 197, 94);
+                    doc.rect(0, 0, pageWidth, 20, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Course Corner', pageWidth / 2, 13, { align: 'center' });
+
+                    // Add student info section with border
+                    doc.setDrawColor(200, 200, 200);
+                    doc.setLineWidth(0.5);
+                    doc.rect(10, 25, pageWidth - 20, 25);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(12);
+                    doc.text(`Student Name: ${studentName.value}`, 15, 35);
+                    doc.text('Courses Report', 15, 42);
+
+                    let yPos = 60;
+
+                    // Courses Section with colored sections
+                    const sections = document.querySelectorAll('.collapsible-header');
+                    if (sections && sections.length > 0) {
+                        sections.forEach((section, index) => {
+                            // Set color based on section type
+                            let sectionColor;
+                            const title = section.querySelector('h3')?.textContent || '';
+                            if (title.includes('Degree')) {
+                                sectionColor = [34, 197, 94]; // Green
+                            } else if (title.includes('Diploma')) {
+                                sectionColor = [59, 130, 246]; // Blue
+                            } else if (title.includes('Certificate')) {
+                                sectionColor = [139, 92, 246]; // Purple
+                            } else {
+                                sectionColor = [249, 115, 22]; // Orange
+                            }
+
+                            // Section header with color
+                            doc.setFillColor(...sectionColor);
+                            doc.rect(10, yPos, pageWidth - 20, 10, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.setFontSize(12);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(title, 15, yPos + 7);
+                            yPos += 15;
+
+                            // Course listings
+                            doc.setTextColor(0, 0, 0);
+                            doc.setFontSize(10);
+                            doc.setFont('helvetica', 'normal');
+
+                            const coursesList = section.nextElementSibling?.querySelectorAll('li') || [];
+                            coursesList.forEach(course => {
+                                if (yPos >= pageHeight - 20) {
+                                    doc.addPage();
+                                    yPos = 20;
+                                }
+                                doc.text('✓', 15, yPos);
+                                doc.text(course.textContent.trim(), 25, yPos);
+                                yPos += 7;
+                            });
+
+                            yPos += 10;
+                        });
+                    }
+
+                    // Add footer
+                    doc.setTextColor(128, 128, 128);
+                    doc.setFontSize(8);
+                    doc.text('© Course Corner 2025', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+                    // Save the PDF
+                    const fileName = `${studentName.value.replace(/\s+/g, '_')}_courses.pdf`;
+                    doc.save(fileName);
+
+                    // Close loading alert and show success message
+                    loadingAlert.close();
+
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'PDF Generated!',
+                            text: 'Your courses report has been downloaded.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#16a34a',
+                            allowOutsideClick: true,
+                            showConfirmButton: true,
+                            didOpen: () => {
+                                Swal.hideLoading();
+                            }
+                        });
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to generate PDF. Please try again.'
+                });
+            }
+        }
+    </script>
+
+    <!-- Payment Button Handlers - Unified Payment Flow -->
+    <script>
+        // ===== UNIFIED PAYMENT FLOW =====
+        // All payment logic is centralized here to prevent duplicate handlers
+
+        // Clear any existing payment handlers from courses-eligibility.js
+        window.PAYMENT_HANDLERS_INITIALIZED = true;
+
+        // Initialize Payment Handler with your server URL
+        // Server is hosted on Vercel
+        const SERVER_URL = 'https://course-corner-server.vercel.app/api';
+
+        // Create single payment handler instance
+        if (!window.paymentHandler) {
+            window.paymentHandler = new PaymentHandler(SERVER_URL);
+        }
+
+        // Validate student subjects before payment
+        function validateSubjects() {
+            const errors = [];
+
+            // Check compulsory subjects
+            const english = document.getElementById('english')?.value;
+            const kiswahili = document.getElementById('kiswahili')?.value;
+            const mathematics = document.getElementById('mathematics')?.value;
+
+            if (!english) errors.push('English');
+            if (!kiswahili) errors.push('Kiswahili');
+            if (!mathematics) errors.push('Mathematics');
+
+            // Count total subjects selected
+            let totalSubjects = 0;
+            document.querySelectorAll('.grade-select').forEach(select => {
+                if (select.value) totalSubjects++;
+            });
+
+            return {
+                valid: errors.length === 0 && totalSubjects >= 7,
+                missingCompulsory: errors,
+                totalSubjects: totalSubjects,
+                needMore: Math.max(0, 7 - totalSubjects)
+            };
+        }
+
+        // Main payment processing function
+        async function processPayment(category, amount) {
+            const grades = getStudentGrades ? getStudentGrades() : {};
+            const overallGrade = document.getElementById('overallGrade').value;
+
+            // Validate subjects before showing payment window
+            const validation = validateSubjects();
+
+            if (!validation.valid) {
+                let errorHtml = '<div class="text-left">';
+
+                if (validation.missingCompulsory.length > 0) {
+                    errorHtml += `<p class="mb-2"><strong>Missing compulsory subjects:</strong></p>`;
+                    errorHtml += `<ul class="list-disc list-inside mb-3 text-red-600">`;
+                    validation.missingCompulsory.forEach(subj => {
+                        errorHtml += `<li>${subj}</li>`;
+                    });
+                    errorHtml += `</ul>`;
+                }
+
+                if (validation.needMore > 0) {
+                    errorHtml += `<p class="text-gray-600">You need <strong>${validation.needMore} more subject(s)</strong> (minimum 7 required).</p>`;
+                    errorHtml += `<p class="text-sm text-gray-500 mt-2">Currently selected: ${validation.totalSubjects} subjects</p>`;
+                }
+
+                errorHtml += '</div>';
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please Complete Your Grades',
+                    html: errorHtml,
+                    confirmButtonColor: '#16a34a',
+                    confirmButtonText: 'Fill Grades'
+                });
+
+                // Scroll to the grades section
+                document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+                return false;
+            }
+
+            // Get phone number from user
+            const { value: phoneNumber } = await Swal.fire({
+                title: 'M-Pesa Payment',
+                html: `
+                    <div class="text-left mb-4">
+                        <p class="text-gray-600 mb-2">Service: <strong>${getCategoryName(category)}</strong></p>
+                        <p class="text-gray-600">Amount: <strong class="text-green-600">KSH ${amount}</strong></p>
+                    </div>
+                `,
+                input: 'text',
+                inputLabel: 'Enter your M-Pesa phone number',
+                inputPlaceholder: '0712345678 or 254712345678',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Pay Now',
+                confirmButtonColor: '#16a34a',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Phone number is required!';
+                    }
+                    if (!/\d{9,}/.test(value.replace(/[^\d]/g, ''))) {
+                        return 'Please enter a valid phone number';
+                    }
+                }
+            });
+
+            if (!phoneNumber) return false; // User cancelled
+
+            try {
+                // Show payment processing message
+                Swal.fire({
+                    title: 'Initiating Payment...',
+                    html: `
+                        <p class="mb-2">Amount: <strong>KSH ${amount}</strong></p>
+                        <p>Phone: <strong>${phoneNumber}</strong></p>
+                        <p class="mt-4 text-sm text-gray-500">Sending STK push to your phone...</p>
+                    `,
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Initiate payment
+                const referralCode = localStorage.getItem('pendingReferralCode') || null;
+                if (referralCode) {
+                    console.log('📌 Applying referral code from storage:', referralCode);
+                }
+
+                await window.paymentHandler.initiatePayment(phoneNumber, category, amount, referralCode);
+
+                // Show payment status and start polling immediately
+                const paymentStatusDiv = document.getElementById('paymentStatus');
+                const paymentMessage = document.getElementById('paymentMessage');
+                paymentStatusDiv.classList.remove('hidden');
+                paymentMessage.textContent = 'Waiting for M-Pesa confirmation...';
+
+                // Show waiting for M-Pesa with real-time status updates (no button click required)
+                let paymentCancelled = false;
+                Swal.fire({
+                    title: '📱 Check Your Phone!',
+                    html: `
+                        <div class="text-center">
+                            <p class="mb-3">An M-Pesa prompt has been sent to:</p>
+                            <p class="text-xl font-bold text-green-600 mb-4">${phoneNumber}</p>
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4 text-left">
+                                <p class="text-sm text-yellow-800">
+                                    <strong>Enter your M-Pesa PIN</strong> on your phone to complete the payment.
+                                </p>
+                            </div>
+                            <div id="swal-status-container" class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-center mb-2">
+                                    <span class="inline-block w-3 h-3 bg-yellow-500 rounded-full animate-pulse mr-2"></span>
+                                    <span id="swal-status-text" class="text-sm font-medium text-gray-700">Waiting for your PIN entry...</span>
+                                </div>
+                                <p id="swal-attempt-text" class="text-xs text-gray-400">Listening for M-Pesa response...</p>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3">Click Cancel if you didn't receive the prompt</p>
+                        </div>
+                    `,
+                    allowOutsideClick: true,
+                    allowEscapeKey: true,
+                    showConfirmButton: false,
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
+                    cancelButtonColor: '#6b7280',
+                    didOpen: () => Swal.showLoading()
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        paymentCancelled = true;
+                    }
+                });
+
+                // Wait for payment with status callback (starts immediately, no button click needed)
+                // REDUCED: 5 attempts * 3s = 15s timeout for faster feedback
+                const pollResult = await window.paymentHandler.pollPaymentStatus(5, 3000, (status, attempt, maxAttempts) => {
+                    const statusText = document.getElementById('swal-status-text');
+                    const attemptText = document.getElementById('swal-attempt-text');
+                    if (statusText) {
+                        if (status === 'pending') {
+                            statusText.textContent = 'Waiting for M-Pesa confirmation...';
+                        } else if (status === 'completed') {
+                            statusText.textContent = 'Payment confirmed! ✅';
+                        } else if (status === 'failed') {
+                            statusText.textContent = 'Payment failed ❌';
+                        }
+                    }
+                    if (attemptText) {
+                        const timeRemaining = Math.max(0, (maxAttempts - attempt) * 3);
+                        attemptText.textContent = `Checking... ${attempt}/${maxAttempts} • Timeout in ~${timeRemaining}s`;
+                    }
+                });
+
+                // Check if cancelled or failed
+                if (paymentCancelled) {
+                    window.paymentHandler.clearSession();
+                    return false;
+                }
+
+                if (!pollResult.success) {
+                    if (pollResult.timedOut) {
+                        // Register timeout in the backend
+                        await window.paymentHandler.registerTimeout();
+                        throw new Error('Payment confirmation timed out. If you have paid, please use the "I Already Paid" button to verify your code.');
+                    } else {
+                        throw new Error(pollResult.status === 'failed' ? 'Payment failed. Please try again.' : 'An error occurred during payment verification.');
+                    }
+                }
+
+                // Payment successful - approve access
+                await window.paymentHandler.approveAccess();
+
+                // Hide payment status
+                paymentStatusDiv.classList.add('hidden');
+
+                // Show brief success message then auto-redirect to results
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Successful! ✅',
+                    html: `<p class="text-green-600 mb-2">Your payment has been confirmed!</p>`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        document.body.classList.remove('swal2-shown');
+                    }
+                });
+
+                // Show results after dialog closes
+                showResultsAfterPayment(category);
+
+                // Scroll to results section
+                document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
+
+                return true; // Payment successful
+
+            } catch (error) {
+                document.getElementById('paymentStatus').classList.add('hidden');
+
+                // Close any existing dialogs first
+                Swal.close();
+
+                // Determine icon and title based on error message
+                let icon = 'error';
+                let title = 'Payment Failed';
+                const errorMsg = error.message || 'An error occurred during payment verification';
+
+                if (errorMsg.toLowerCase().includes('timeout') || errorMsg.toLowerCase().includes('timed out')) {
+                    // Specific timeout handling as requested
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Payment Still Processing',
+                        html: `
+                            <p class="mb-3">We didn't receive confirmation in time.</p>
+                            <p class="text-sm text-gray-600 mb-4">If you entered your PIN and saw a success message on your phone, click <strong>Verify Payment</strong> to check again.</p>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Verify Payment',
+                        cancelButtonText: 'Try Again',
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#16a34a'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            // Call verifyExistingPayment directly
+                            await window.paymentHandler.verifyExistingPayment(phoneNumber, category, () => showResultsAfterPayment(category));
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            // User wants to try again - just re-trigger processPayment
+                            processPayment(category, amount);
+                        }
+                    });
+                    return false;
+                }
+
+                // Determine icon and title for other errors
+                if (errorMsg.toLowerCase().includes('cancel')) {
+                    icon = 'warning';
+                    title = 'Payment Cancelled';
+                } else if (errorMsg.toLowerCase().includes('pin') || errorMsg.toLowerCase().includes('wrong')) {
+                    icon = 'error';
+                    title = 'Wrong PIN';
+                } else if (errorMsg.toLowerCase().includes('insufficient') || errorMsg.toLowerCase().includes('balance')) {
+                    icon = 'warning';
+                    title = 'Insufficient Balance';
+                }
+
+                await Swal.fire({
+                    icon: icon,
+                    title: title,
+                    html: `
+                        <p class="mb-3">${errorMsg}</p>
+                        <p class="text-sm text-gray-500">You can try again by clicking the button.</p>
+                    `,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#16a34a',
+                    allowOutsideClick: true,
+                    allowEscapeKey: true,
+                    willClose: () => {
+                        document.body.classList.remove('swal2-shown');
+                    }
+                });
+
+                window.paymentHandler.clearSession();
+                return false;
+            }
+        }
+
+        // Helper function to get category display name
+        function getCategoryName(category) {
+            const names = {
+                'calculate-cluster-points': 'Cluster Points Calculation',
+                'courses-only': 'Eligible Courses',
+                'point-and-courses': 'Cluster Points & Courses'
+            };
+            return names[category] || category;
+        }
+
+        // Handle calculate results after payment
+        function showResultsAfterPayment(category) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.remove('hidden');
+
+            if (category === 'calculate-cluster-points') {
+                // Calculate and show cluster points only
+                if (typeof calculateClusterPoints === 'function') {
+                    calculateClusterPoints();
+                }
+            } else if (category === 'courses-only') {
+                // Show eligible courses only
+                if (typeof getStudentGrades === 'function' && typeof getEligibleCourses === 'function') {
+                    const grades = getStudentGrades();
+                    const eligibleCourses = getEligibleCourses(grades);
+                    if (typeof displayAllResults === 'function') {
+                        displayAllResults(eligibleCourses);
+                    }
+                }
+            } else if (category === 'point-and-courses') {
+                // Show both cluster points and courses
+                if (typeof calculateClusterPoints === 'function') {
+                    calculateClusterPoints();
+                }
+                if (typeof getStudentGrades === 'function' && typeof getEligibleCourses === 'function') {
+                    const grades = getStudentGrades();
+                    const eligibleCourses = getEligibleCourses(grades);
+                    if (typeof displayCombinedResults === 'function') {
+                        displayCombinedResults(eligibleCourses);
+                    }
+                }
+            }
+
+            // Scroll to results
+            setTimeout(() => {
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
+
+        // Initialize payment button handlers on DOM ready
+        document.addEventListener('DOMContentLoaded', function () {
+            // Remove any previous handlers and add unified ones
+            const paymentBtns = document.querySelectorAll('.payment-btn');
+
+            paymentBtns.forEach(btn => {
+                // Clone to remove old handlers
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+
+                newBtn.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const category = this.getAttribute('data-category');
+                    const amount = this.getAttribute('data-amount');
+
+                    console.log('Payment button clicked:', category, amount);
+
+                    // Process payment first
+                    const paymentSuccess = await processPayment(category, amount);
+
+                    // Only show results if payment was successful
+                    if (paymentSuccess) {
+                        showResultsAfterPayment(category);
+                    }
+                });
+            });
+
+            console.log('Unified payment handlers initialized for', paymentBtns.length, 'buttons');
+        });
+
+        // Check if user already has paid access on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const sessionId = localStorage.getItem('paymentSessionId');
+            if (sessionId) {
+                try {
+                    const access = await window.paymentHandler.hasAccessToCategory();
+                    if (access.hasAccess) {
+                        console.log('User has existing paid access');
+                    }
+                } catch (error) {
+                    console.log('Access check skipped:', error.message);
+                }
+            }
+        });
+    </script>
+
+    <!-- Authentication Modals removed in favor of dynamic injection from auth-ui.js -->
+
+    <!-- Auth Handlers script removed in favor of external assets/js/auth-handlers.js -->
+    <script>
+        // Use the global Firebase functions from firebase-config.js
+        window.savePaymentToFirebase = window.firebaseSavePayment;
+        window.trackFirebaseEvent = window.firebaseTrackEvent;
+    </script>
+</body>
+
+</html>

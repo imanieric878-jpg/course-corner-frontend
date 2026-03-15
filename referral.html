@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Program - Course Corner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="assets/css/modern-ui.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/firebase-config.js" type="module"></script>
+    <script src="assets/js/firebase-auth.js" defer></script>
+    <script src="assets/js/auth-ui.js" defer></script>
+    <script src="assets/js/auth-handlers.js" defer></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            color: #111827;
+        }
+
+        /* Prevent flicker - hide both views initially */
+        .guest-view,
+        .dashboard-view {
+            display: none;
+        }
+
+        .guest-view.active,
+        .dashboard-view.active {
+            display: block;
+        }
+
+        .referral-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 4rem;
+        }
+
+        @media (min-width: 1024px) {
+            .referral-container {
+                padding: 3rem 2rem 4rem;
+            }
+        }
+
+        /* Guest View - How It Works */
+        .referral-hero {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .referral-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .referral-hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .referral-hero p {
+            font-size: 1.1rem;
+            color: #4b5563;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .referral-hero-icon {
+            width: 80px;
+            height: 80px;
+            background: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .referral-hero-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        /* Steps Section */
+        .steps-section {
+            margin-bottom: 3rem;
+        }
+
+        .steps-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #111827;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .steps-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .step-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .step-card:hover {
+            border-color: #16a34a;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-card p {
+            font-size: 0.9375rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Earnings Highlight */
+        .earnings-card {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .earnings-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .earnings-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .earnings-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Login CTA */
+        .login-cta {
+            background: white;
+            border: 2px solid #16a34a;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .login-cta h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+
+        .login-cta p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-login-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #16a34a;
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-login-cta:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        /* ============ LOGGED IN VIEW ============ */
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.active {
+            display: block;
+        }
+
+        .guest-view.hidden {
+            display: none;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dashboard-header-icon {
+            width: 56px;
+            height: 56px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-header-icon i {
+            font-size: 1.5rem;
+            color: #16a34a;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 0.9375rem;
+        }
+
+        /* Referral Code Card */
+        .code-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .code-card-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .code-display {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .code-display.has-code {
+            border-style: solid;
+            border-color: #16a34a;
+            background: #f0fdf4;
+        }
+
+        .code-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: #16a34a;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-placeholder {
+            color: #9ca3af;
+            font-size: 0.9375rem;
+        }
+
+        .generate-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            background: #16a34a;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            background: #15803d;
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .generate-btn.generated {
+            background: #6b7280;
+        }
+
+        /* Link Card */
+        .link-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .link-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .link-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .link-input {
+            flex: 1;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            background: #111827;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #1f2937;
+        }
+
+        .copy-btn.copied {
+            background: #16a34a;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: #6b7280;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .info-box i {
+            color: #f59e0b;
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #111827;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.9375rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #16a34a;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Modern Navigation -->
+    <header class="modern-header" id="mainHeader">
+        <div class="header-container">
+            <a class='logo' href='index.html'>
+                <img src="assets/images/logo.png" alt="Course Corner logo" />
+                <span>Course Corner</span>
+            </a>
+
+            <nav class="nav-desktop">
+                <a class='nav-link' href='index.html'>Home</a>
+                <a class='nav-link' href='about.html'>About Us</a>
+                <a class='nav-link' href='calculator.html'>Calculator</a>
+                <a class='nav-link' href='cluster-points.html'>Cluster Points</a>
+                <a class='nav-link' href='application.html'>Application Guide</a>
+                <a class='nav-link' href='resources.html'>Resources</a>
+                <a class='nav-link' href='contact.html'>Contact</a>
+                <button id="profileBtn"
+                    class="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hidden ml-2 hover:bg-green-700 transition-all flex items-center gap-2"
+                    onclick="window.firebaseAuth?.openProfileModal()">
+                    <i class="fas fa-user-circle"></i> Profile
+                </button>
+            </nav>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a class='mobile-nav-link' href='index.html'>Home</a>
+            <a class='mobile-nav-link' href='about.html'>About Us</a>
+            <a class='mobile-nav-link' href='calculator.html'>Calculator</a>
+            <a class='mobile-nav-link' href='cluster-points.html'>Cluster Points</a>
+            <a class='mobile-nav-link' href='application.html'>Application Guide</a>
+            <a class='mobile-nav-link' href='resources.html'>Resources</a>
+            <a class='mobile-nav-link' href='contact.html'>Contact</a>
+            <a href="#" id="profileBtnMobile" class="mobile-nav-link hidden"
+                onclick="window.firebaseAuth?.openProfileModal()">
+                <i class="fas fa-user-circle mr-2"></i>My Profile
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="referral-container" style="padding-top: 7rem;">
+
+        <!-- Loading State -->
+        <div id="pageLoader" class="flex flex-col items-center justify-center py-20">
+            <div class="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-500 font-medium">Loading your dashboard...</p>
+        </div>
+
+        <!-- ========== GUEST VIEW ========== -->
+        <div class="guest-view" id="guestView">
+            <div class="referral-hero">
+                <div class="referral-hero-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <h1>Earn Money by Referring Friends</h1>
+                <p>Share Course Corner with friends and earn 12% commission on every payment they make!</p>
+            </div>
+
+            <!-- Earnings Highlight -->
+            <div class="earnings-card">
+                <h2>Your Commission Rate</h2>
+                <div class="earnings-amount">12%</div>
+                <p>of every payment made by your referrals</p>
+            </div>
+
+            <!-- How It Works -->
+            <div class="steps-section">
+                <h2>How It Works</h2>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Get Your Code</h3>
+                        <p>Sign in to your account and generate your unique 5-character referral code. You only need to
+                            do this once!</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>Share Your Link</h3>
+                        <p>Share your personalized referral link with friends, family, or on social media. The more you
+                            share, the more you earn!</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>Earn Rewards</h3>
+                        <p>When someone uses your code and pays for any service, you automatically earn 12% of their
+                            payment. It's that simple!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login CTA -->
+            <div class="login-cta">
+                <h3>Ready to Start Earning?</h3>
+                <p>Sign in or create an account to get your unique referral code and start earning today!</p>
+                <button class="btn-login-cta" onclick="window.firebaseAuth?.openAuthModal()">
+                    <i class="fas fa-user"></i>
+                    Sign In to Get Started
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== LOGGED IN DASHBOARD VIEW ========== -->
+        <div class="dashboard-view" id="dashboardView">
+
+            <!-- Welcome Section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 md:mb-8">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Referral Dashboard</h1>
+                    <p class="text-gray-500 mt-1">Welcome back, <span id="userNameDisplay"
+                            class="font-semibold text-green-600">User</span></p>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="window.firebaseAuth?.openProfileModal()"
+                        class="flex items-center gap-2 bg-white border border-gray-200 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                        <i class="fas fa-cog text-gray-400"></i>
+                        Profile Settings
+                    </button>
+                    <button onclick="window.location.reload()"
+                        class="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-green-600 transition-all shadow-sm">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid - Improved Design -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                <div
+                    class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-users text-4xl text-green-600"></i>
+                    </div>
+                    <p class="text-xs md:text-sm font-medium text-gray-500 mb-1">Total Referrals</p>
+                    <div class="text-2xl md:text-3xl font-bold text-gray-900" id="statReferrals">0</div>
+                    <div class="mt-2 text-[10px] md:text-xs text-green-600 font-medium flex items-center gap-1">
+                        <i class="fas fa-arrow-up"></i> All time
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-check-double text-4xl text-blue-600"></i>
+                    </div>
+                    <p class="text-xs md:text-sm font-medium text-gray-500 mb-1">Paid Referrals</p>
+                    <div class="text-2xl md:text-3xl font-bold text-gray-900" id="statPaid">0</div>
+                    <div class="mt-2 text-[10px] md:text-xs text-blue-600 font-medium flex items-center gap-1">
+                        <i class="fas fa-award"></i> Successfully paid
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-money-bill-wave text-4xl text-emerald-600"></i>
+                    </div>
+                    <p class="text-xs md:text-sm font-medium text-gray-500 mb-1">Total Earnings</p>
+                    <div class="text-2xl md:text-3xl font-bold text-emerald-600" id="statEarnings">KES 0</div>
+                    <div class="mt-2 text-[10px] md:text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <i class="fas fa-coins"></i> 12% commission
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-amber-100 bg-amber-50/30 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-clock text-4xl text-amber-600"></i>
+                    </div>
+                    <p class="text-xs md:text-sm font-medium text-amber-800/70 mb-1">Pending Payout</p>
+                    <div class="text-2xl md:text-3xl font-bold text-amber-600" id="statPending">KES 0</div>
+                    <div class="mt-2 text-[10px] md:text-xs text-amber-600 font-medium flex items-center gap-1">
+                        <i class="fas fa-hourglass-half"></i> Ready for withdrawal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Referral Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+                <!-- Left Column: Code and Link -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+                        <div class="p-6 md:p-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 tracking-tight">Your Referral Code</h3>
+                                    <p class="text-sm text-gray-500 mt-1">Use this code to invite your friends</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center">
+                                    <i class="fas fa-gift text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Big Code Display -->
+                            <div class="relative group cursor-pointer mb-8" id="codeDisplay"
+                                onclick="copyReferralCode()">
+                                <div
+                                    class="absolute inset-0 bg-green-600/5 rounded-2xl transform group-hover:scale-[1.01] transition-transform duration-200">
+                                </div>
+                                <div
+                                    class="relative flex items-center justify-center p-8 border-2 border-dashed border-green-200 rounded-2xl bg-white/50 backdrop-blur-sm min-h-[140px]">
+                                    <div class="code-placeholder text-gray-400 font-medium text-center"
+                                        id="codePlaceholder">Click below to generate your unique code</div>
+                                    <div class="code-value hidden text-4xl md:text-5xl font-black text-green-600 tracking-[0.2em] font-mono"
+                                        id="codeValue">XXXXX</div>
+                                </div>
+                                <div
+                                    class="absolute bottom-3 right-3 text-[10px] font-bold text-green-600 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                    <i class="fas fa-copy"></i> Click to copy
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                                <button
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-green-600/20 flex items-center justify-center gap-2"
+                                    id="generateBtn" onclick="generateReferralCode()">
+                                    <i class="fas fa-magic"></i>
+                                    Generate My Code
+                                </button>
+                                <button
+                                    class="hidden flex-1 bg-gray-900 hover:bg-black text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-gray-900/20 flex items-center justify-center gap-2"
+                                    id="copyCodeBtn" onclick="copyReferralCode()">
+                                    <i class="fas fa-copy"></i>
+                                    Copy Code
+                                </button>
+                            </div>
+
+                            <p class="text-center text-[10px] md:text-xs text-gray-400">
+                                <i class="fas fa-info-circle mr-1"></i> Your code can only be generated once and remains
+                                permanent.
+                            </p>
+                        </div>
+
+                        <!-- Link Section -->
+                        <div class="bg-gray-50 p-6 md:p-8 border-t border-gray-100" id="linkSection"
+                            style="display: none;">
+                            <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Share your customized
+                                        referral link</label>
+                                    <div class="relative">
+                                        <input type="text"
+                                            class="w-full bg-white border border-gray-300 rounded-xl pl-4 pr-12 py-3.5 font-mono text-xs md:text-sm text-gray-700 focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                                            id="referralLink" readonly>
+                                        <button
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                            onclick="copyReferralLink()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button
+                                    class="bg-gray-900 hover:bg-black text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2"
+                                    id="copyBtn" onclick="copyReferralLink()">
+                                    <i class="fas fa-link text-sm"></i>
+                                    Copy Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payouts Section (Moved above share) -->
+                    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden"
+                        id="withdrawalSection">
+                        <div class="p-6 md:p-8">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div
+                                    class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
+                                    <i class="fas fa-wallet text-emerald-600"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 tracking-tight">Payments</h3>
+                            </div>
+
+                            <div class="mb-8">
+                                <div class="text-3xl md:text-4xl font-black text-gray-900 mb-1"
+                                    id="withdrawableBalance">KES 0</div>
+                                <p class="text-xs md:text-sm text-gray-500">Available for withdrawal to M-Pesa</p>
+                            </div>
+
+                            <!-- Withdrawal Button -->
+                            <button id="withdrawBtn" onclick="requestWithdrawal()"
+                                class="w-full py-5 px-6 rounded-2xl font-bold transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-400 group h-16"
+                                disabled>
+                                <i
+                                    class="fas fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                                <span id="withdrawBtnText">Minimum KES 100 required</span>
+                            </button>
+
+                            <div class="mt-6 flex flex-col gap-3">
+                                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3">
+                                    <i class="fas fa-exclamation-circle text-amber-600 mt-0.5 text-sm"></i>
+                                    <p class="text-[11px] text-amber-800 leading-relaxed font-semibold">
+                                        <strong>Minimum Withdrawal: KES 100</strong><br>
+                                        <span class="text-amber-700 font-normal">You need at least KES 100 to request a
+                                            withdrawal.</span>
+                                    </p>
+                                </div>
+                                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-start gap-3">
+                                    <i class="fas fa-info-circle text-gray-400 mt-0.5 text-xs"></i>
+                                    <p class="text-[11px] text-gray-500 leading-relaxed" id="withdrawNotice">
+                                        Earnings are sent to your <strong>M-Pesa number</strong>. Payouts are usually
+                                        processed within 24-48 hours.
+                                    </p>
+                                </div>
+
+                                <!-- Edit Phone Quick Access -->
+                                <button onclick="window.firebaseAuth?.openProfileModal()"
+                                    class="w-full py-3 px-4 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-phone-alt text-green-600"></i>
+                                    Change M-Pesa Number
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="bg-white rounded-3xl border border-gray-200 p-6 md:p-8 shadow-sm" id="shareSection"
+                        style="display: none;">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 tracking-tight">
+                            <i class="fas fa-share-alt text-green-600"></i>
+                            Quick Share
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <button onclick="shareOnWhatsApp()"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 hover:bg-green-100 text-green-600 transition-all border border-green-100 group">
+                                <div
+                                    class="w-10 h-10 md:w-12 md:h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fab fa-whatsapp text-xl md:text-2xl"></i>
+                                </div>
+                                <span class="text-[10px] md:text-xs font-bold uppercase tracking-tight">WhatsApp</span>
+                            </button>
+                            <button onclick="shareOnTwitter()"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-600 transition-all border border-sky-100 group">
+                                <div
+                                    class="w-10 h-10 md:w-12 md:h-12 bg-sky-500 text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fab fa-twitter text-xl md:text-2xl"></i>
+                                </div>
+                                <span class="text-[10px] md:text-xs font-bold uppercase tracking-tight">Twitter</span>
+                            </button>
+                            <button onclick="shareOnFacebook()"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all border border-blue-100 group">
+                                <div
+                                    class="w-10 h-10 md:w-12 md:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fab fa-facebook-f text-xl md:text-2xl"></i>
+                                </div>
+                                <span class="text-[10px] md:text-xs font-bold uppercase tracking-tight">Facebook</span>
+                            </button>
+                            <button onclick="shareOnTelegram()"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-700 transition-all border border-sky-100 group">
+                                <div
+                                    class="w-10 h-10 md:w-12 md:h-12 bg-sky-600 text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fab fa-telegram-plane text-xl md:text-2xl"></i>
+                                </div>
+                                <span class="text-[10px] md:text-xs font-bold uppercase tracking-tight">Telegram</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Rules -->
+                <div class="space-y-6">
+                    <!-- Earnings Info -->
+                    <div
+                        class="bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 text-white shadow-lg shadow-green-600/20 relative overflow-hidden">
+                        <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-lg font-bold mb-4">Commission Rules</h4>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-3 text-xs leading-normal">
+                                    <div
+                                        class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="fas fa-percent text-[9px]"></i>
+                                    </div>
+                                    <span>You earn a <strong>12% flat commission</strong> on every single purchase made
+                                        through your link.</span>
+                                </li>
+                                <li class="flex items-start gap-3 text-xs leading-normal">
+                                    <div
+                                        class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="fas fa-bolt text-[9px]"></i>
+                                    </div>
+                                    <span>Your earnings balance is updated <strong>instantly</strong> once your friend
+                                        completes their payment.</span>
+                                </li>
+                                <li class="flex items-start gap-3 text-xs leading-normal">
+                                    <div
+                                        class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="fas fa-infinity text-[9px]"></i>
+                                    </div>
+                                    <span>There is <strong>no limit</strong> to how much you can earn. Share more to
+                                        earn more!</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- WhatsApp Hub Section -->
+    <section class="wa-hub-section">
+        <div class="wa-hub-content">
+            <h2 class="wa-hub-title">Join Our Academic Community</h2>
+            <p class="wa-hub-description">Get instant updates on campus news, application deadlines, and expert career
+                guidance directly on your phone.</p>
+            <div class="wa-hub-btns">
+                <a href="https://chat.whatsapp.com/IiipHgYt5yHL6n126NAKBX" target="_blank" class="btn-wa btn-wa-group">
+                    <i class="fab fa-whatsapp"></i>
+                    Join WhatsApp Group
+                </a>
+                <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank"
+                    class="btn-wa btn-wa-channel">
+                    <i class="fas fa-bell"></i>
+                    Follow WhatsApp Channel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modern Footer -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-brand">
+                        <img class="footer-logo" src="assets/images/logo.png" alt="Course Corner logo" />
+                        <span>Course Corner</span>
+                    </div>
+                    <p class="footer-description">
+                        Empowering students to make informed decisions about their educational future through
+                        personalized course recommendations.
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href='index.html'>Home</a></li>
+                        <li><a href='calculator.html'>Calculator</a></li>
+                        <li><a href='cluster-points.html'>Cluster Points</a></li>
+                        <li><a href='application.html'>Application Guide</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href='resources.html'>Resources Library</a></li>
+                        <li><a href='how-to-use.html'>How to Use</a></li>
+                        <li><a href='#'>Privacy Policy</a></li>
+                        <li><a href='#'>Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> imanieric878@gmail.com</li>
+                        <li><i class="fas fa-phone"></i> 0704372636</li>
+                    </ul>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© Course Corner <span id="currentYear"></span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal (Same as other pages) -->
+    <div id="authModal" class="auth-modal-overlay hidden">
+        <div class="auth-modal">
+            <div class="modal-header">
+                <h2>Welcome</h2>
+                <button class="modal-close-btn" onclick="window.firebaseAuth.closeAuthModal()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button id="loginTab" class="auth-tab active" onclick="window.firebaseAuth.switchAuthMode('login')">
+                        Login
+                    </button>
+                    <button id="signupTab" class="auth-tab" onclick="window.firebaseAuth.switchAuthMode('signup')">
+                        Sign Up
+                    </button>
+                </div>
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password"
+                            required>
+                    </div>
+                    <div class="form-group text-right">
+                        <a class="auth-link text-sm" onclick="window.firebaseAuth.switchAuthMode('forgot')">Forgot
+                            password?</a>
+                    </div>
+                    <button type="submit" id="loginBtn" class="btn-primary">
+                        <span>Login</span>
+                    </button>
+                </form>
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form hidden" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" class="form-input" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPhone">M-Pesa Phone <span class="text-xs text-gray-500">(for
+                                payouts)</span></label>
+                        <input type="tel" id="signupPhone" class="form-input" placeholder="07XXXXXXXX" required
+                            pattern="^(0|254|\+254)?[17]\d{8}$">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" class="form-input"
+                            placeholder="Create a password (min 6 chars)" required minlength="6">
+                    </div>
+                    <button type="submit" id="signupBtn" class="btn-primary">
+                        <span>Create Account</span>
+                    </button>
+                </form>
+                <!-- Forgot Password Form -->
+                <form id="forgotForm" class="auth-form hidden" onsubmit="handleForgotPassword(event)">
+                    <p class="text-gray-600 mb-4">Enter your email and we'll send you a reset link.</p>
+                    <div class="form-group">
+                        <label for="forgotEmail">Email Address</label>
+                        <input type="email" id="forgotEmail" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <button type="submit" id="forgotBtn" class="btn-primary">
+                        <span>Send Reset Link</span>
+                    </button>
+                    <div class="text-center mt-3">
+                        <a class="auth-link" onclick="window.firebaseAuth.switchAuthMode('login')">Back to Login</a>
+                    </div>
+                </form>
+                <!-- Divider -->
+                <div class="auth-divider" id="authDivider">
+                    <span>or</span>
+                </div>
+                <!-- Google Sign In -->
+                <button id="googleSignIn" class="btn-google" onclick="window.firebaseAuth.signInWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        width="20">
+                    <span>Continue with Google</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        let isMenuOpen = false;
+
+        function toggleMobileMenu() {
+            isMenuOpen = !isMenuOpen;
+            mobileMenuBtn.classList.toggle('active', isMenuOpen);
+            mobileMenu.classList.toggle('active', isMenuOpen);
+        }
+
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => { isMenuOpen = false; mobileMenuBtn.classList.remove('active'); mobileMenu.classList.remove('active'); });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (isMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                isMenuOpen = false;
+                mobileMenuBtn.classList.remove('active');
+                mobileMenu.classList.remove('active');
+            }
+        });
+
+        // Header scroll effect
+        const header = document.getElementById('mainHeader');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            // Use the global firebase auth toast if available, otherwise fallback
+            if (window.firebaseAuth && window.firebaseAuth.showToast) {
+                window.firebaseAuth.showToast(message, type);
+            } else {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = 'toast show' + (type === 'success' ? ' success' : '');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Generate random 5-character code
+        function generateCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 5; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Generate referral code for user
+        async function generateReferralCode() {
+            const btn = document.getElementById('generateBtn');
+
+            if (!window.firebaseAuth || !window.firebaseAuth.isLoggedIn()) {
+                showToast('Please sign in first', 'error');
+                return;
+            }
+
+            // Check if user already has a code
+            const profile = window.firebaseAuth.getProfile();
+            if (profile && profile.referralCode) {
+                showToast('You already have a referral code!', 'error');
+                return;
+            }
+
+            // Check if user has phone number - required for payouts
+            if (!profile.phoneNumber) {
+                showToast('Please add your phone number in your profile first (for payouts)', 'error');
+                promptForPhoneNumber();
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+            // Show loading overlay
+            window.firebaseAuth.showLoadingOverlay('Generating Your Code...', 'Creating your unique referral code');
+
+            try {
+                const newCode = generateCode();
+                const user = window.firebaseAuth.currentUser;
+
+                // Save to user profile
+                const result = await window.firebaseAuth.updateUserProfile({
+                    referralCode: newCode,
+                    referralCreatedAt: new Date().toISOString()
+                });
+
+                // Also save to referralCodes collection for admin tracking
+                const { getFirestore, doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js");
+                const db = getFirestore(window.firebaseApp);
+
+                await setDoc(doc(db, 'referralCodes', newCode), {
+                    code: newCode,
+                    userId: user.uid,
+                    userEmail: user.email,
+                    userName: profile.displayName || user.displayName || '',
+                    phoneNumber: profile.phoneNumber || '',
+                    createdAt: new Date().toISOString(),
+                    totalReferrals: 0,
+                    paidReferrals: 0,
+                    totalEarnings: 0,
+                    pendingPayout: 0,
+                    isActive: true
+                });
+
+                if (result.success) {
+                    // Show success overlay
+                    window.firebaseAuth.showSuccessOverlay('Code Generated!', `Your code: ${newCode}`, 2500);
+
+                    setTimeout(() => {
+                        displayReferralCode(newCode);
+                    }, 2500);
+                } else {
+                    throw new Error('Failed to save code');
+                }
+            } catch (error) {
+                console.error('Error generating code:', error);
+                window.firebaseAuth.hideLoadingOverlay();
+                showToast('Error generating code. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic"></i> Generate My Code';
+            }
+        }
+
+        // Prompt user to add phone number
+        async function promptForPhoneNumber() {
+            const { value: phone } = await Swal.fire({
+                title: 'Phone Number Required',
+                html: `
+                    <p style="margin-bottom: 1rem; color: #6b7280;">We need your M-Pesa phone number to send your referral earnings.</p>
+                    <input type="tel" id="swal-phone" class="swal2-input" placeholder="07XXXXXXXX" style="margin: 0;">
+                `,
+                confirmButtonText: 'Save Phone Number',
+                confirmButtonColor: '#16a34a',
+                showCancelButton: true,
+                preConfirm: () => {
+                    const phone = document.getElementById('swal-phone').value;
+                    if (!phone || !/^(0|254|\+254)?[17]\d{8}$/.test(phone.replace(/\s/g, ''))) {
+                        Swal.showValidationMessage('Please enter a valid Kenyan phone number');
+                        return false;
+                    }
+                    return phone;
+                }
+            });
+
+            if (phone) {
+                // Format phone number
+                let formatted = phone.replace(/\s/g, '');
+                if (formatted.startsWith('0')) {
+                    formatted = '254' + formatted.substring(1);
+                } else if (formatted.startsWith('+')) {
+                    formatted = formatted.substring(1);
+                }
+
+                const result = await window.firebaseAuth.updateUserProfile({ phoneNumber: formatted });
+                if (result.success) {
+                    showToast('Phone number saved! You can now generate your code.', 'success');
+                }
+            }
+        }
+
+        // Display the referral code and link
+        function displayReferralCode(code) {
+            const codeDisplay = document.getElementById('codeDisplay');
+            const codePlaceholder = document.getElementById('codePlaceholder');
+            const codeValue = document.getElementById('codeValue');
+            const generateBtn = document.getElementById('generateBtn');
+            const copyCodeBtn = document.getElementById('copyCodeBtn');
+            const linkSection = document.getElementById('linkSection');
+            const shareSection = document.getElementById('shareSection');
+            const referralLink = document.getElementById('referralLink');
+
+            codeDisplay.classList.add('has-code');
+            codePlaceholder.classList.add('hidden');
+            codeValue.classList.remove('hidden');
+            codeValue.textContent = code;
+
+            // Hide generate button, show copy code button
+            generateBtn.classList.add('hidden');
+            copyCodeBtn.classList.remove('hidden');
+
+            // Show link section and share section
+            linkSection.style.display = 'block';
+            shareSection.style.display = 'block';
+            referralLink.value = `https://coursecornerkenya.com/#ref=${code}`;
+        }
+
+        // Copy just the referral code
+        function copyReferralCode() {
+            const code = document.getElementById('codeValue').textContent;
+            const copyBtn = document.getElementById('copyCodeBtn');
+
+            navigator.clipboard.writeText(code).then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                showToast('Code copied: ' + code, 'success');
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Code';
+                }, 2000);
+            }).catch(() => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+
+        // Copy referral link
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink');
+            const copyBtn = document.getElementById('copyBtn');
+
+            navigator.clipboard.writeText(referralLink.value).then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                showToast('Link copied to clipboard!', 'success');
+
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
+                }, 2000);
+            }).catch(() => {
+                // Fallback
+                referralLink.select();
+                document.execCommand('copy');
+                showToast('Link copied!', 'success');
+            });
+        }
+
+        // Social Media Share Functions
+        function getShareText() {
+            return "Check out Course Corner! Use my referral link to get started:";
+        }
+
+        function shareOnWhatsApp() {
+            const link = document.getElementById('referralLink').value;
+            const text = encodeURIComponent(getShareText() + "\n" + link);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareOnTwitter() {
+            const link = document.getElementById('referralLink').value;
+            const text = encodeURIComponent(getShareText());
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        function shareOnFacebook() {
+            const link = document.getElementById('referralLink').value;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        function shareOnTelegram() {
+            const link = document.getElementById('referralLink').value;
+            const text = encodeURIComponent(getShareText());
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`, '_blank');
+        }
+
+        // Update UI based on auth state
+        function updateViewForUser(user) {
+            const guestView = document.getElementById('guestView');
+            const dashboardView = document.getElementById('dashboardView');
+            const loader = document.getElementById('pageLoader');
+
+            if (loader) loader.style.display = 'none';
+
+            if (user) {
+                guestView.classList.remove('active');
+                guestView.classList.add('hidden');
+                dashboardView.classList.add('active');
+
+                // Load user's referral data
+                const profile = window.firebaseAuth.getProfile();
+                if (profile) {
+                    // Update user name display
+                    const userNameDisplay = document.getElementById('userNameDisplay');
+                    if (userNameDisplay) {
+                        userNameDisplay.textContent = profile.displayName || user.displayName || 'User';
+                    }
+
+                    if (profile.referralCode) {
+                        displayReferralCode(profile.referralCode);
+                        
+                        // Fetch real-time stats from referralCodes collection
+                        (async () => {
+                            try {
+                                const { doc, getDoc } = window.firebaseFirestore;
+                                const db = window.firebaseDb;
+                                const codeDoc = await getDoc(doc(db, 'referralCodes', profile.referralCode));
+                                
+                                if (codeDoc.exists()) {
+                                    const stats = codeDoc.data();
+                                    document.getElementById('statReferrals').textContent = stats.totalReferrals || 0;
+                                    document.getElementById('statPaid').textContent = stats.paidReferrals || 0;
+                                    document.getElementById('statEarnings').textContent = 'KES ' + (stats.totalEarnings || 0).toLocaleString();
+                                    document.getElementById('statPending').textContent = 'KES ' + (stats.pendingPayout || 0).toLocaleString();
+                                    
+                                    // Update withdrawal section with latest pending payout
+                                    updateWithdrawalButton(stats.pendingPayout || 0, profile.phoneNumber);
+                                } else {
+                                    // Fallback to profile stats if code doc doesn't exist yet
+                                    updateUIStatsFromProfile(profile);
+                                }
+                            } catch (e) {
+                                console.error('Error fetching real-time stats:', e);
+                                updateUIStatsFromProfile(profile);
+                            }
+                        })();
+                    } else {
+                        updateUIStatsFromProfile(profile);
+                    }
+                }
+            } else {
+                guestView.classList.add('active');
+                guestView.classList.remove('hidden');
+                dashboardView.classList.remove('active');
+            }
+        }
+
+        // Helper to update stats from profile object (fallback)
+        function updateUIStatsFromProfile(profile) {
+            document.getElementById('statReferrals').textContent = profile.referralCount || 0;
+            document.getElementById('statPaid').textContent = profile.referralPaidCount || 0;
+            document.getElementById('statEarnings').textContent = 'KES ' + (profile.referralEarnings || 0).toLocaleString();
+            document.getElementById('statPending').textContent = 'KES ' + (profile.referralPending || 0).toLocaleString();
+            updateWithdrawalButton(profile.referralPending || 0, profile.phoneNumber);
+        }
+
+        // Update withdrawal button based on pending amount
+        function updateWithdrawalButton(pendingAmount, phoneNumber) {
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            const withdrawBtnText = document.getElementById('withdrawBtnText');
+            const withdrawableBalance = document.getElementById('withdrawableBalance');
+
+            withdrawableBalance.textContent = 'KES ' + pendingAmount.toLocaleString();
+
+            if (pendingAmount >= 100) {
+                withdrawBtn.disabled = false;
+                withdrawBtn.classList.remove('bg-gray-200', 'text-gray-500');
+                withdrawBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'text-white');
+                withdrawBtnText.textContent = 'Request Withdrawal';
+            } else {
+                withdrawBtn.disabled = true;
+                withdrawBtn.classList.add('bg-gray-200', 'text-gray-500');
+                withdrawBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'text-white');
+                const remaining = 100 - pendingAmount;
+                withdrawBtnText.textContent = `KES ${remaining} more to unlock withdrawal`;
+            }
+        }
+
+        // Request withdrawal
+        async function requestWithdrawal() {
+            const user = window.firebaseAuth.getCurrentUser();
+            const profile = window.firebaseAuth.getProfile();
+
+            if (!user || !profile) {
+                showToast('Please log in first', 'error');
+                return;
+            }
+
+            const pendingAmount = profile.referralPending || 0;
+
+            if (pendingAmount < 100) {
+                showToast('Minimum withdrawal is KES 100', 'error');
+                return;
+            }
+
+            if (!profile.phoneNumber) {
+                await promptForPhoneNumber();
+                return;
+            }
+
+            // Confirm withdrawal
+            const { isConfirmed } = await Swal.fire({
+                title: 'Request Withdrawal',
+                html: `
+                    <div style="text-align: left; padding: 0.5rem 0;">
+                        <p style="margin-bottom: 1rem; color: #374151;">
+                            <strong>Amount:</strong> KES ${pendingAmount.toLocaleString()}
+                        </p>
+                        <p style="margin-bottom: 1rem; color: #374151;">
+                            <strong>M-Pesa Number:</strong> ${profile.phoneNumber}
+                        </p>
+                        <p style="color: #6b7280; font-size: 0.875rem;">
+                            Your withdrawal will be processed within 24-48 hours.
+                        </p>
+                    </div>
+                `,
+                icon: 'question',
+                confirmButtonText: 'Confirm Withdrawal',
+                confirmButtonColor: '#16a34a',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel'
+            });
+
+            if (!isConfirmed) return;
+
+            try {
+                window.firebaseAuth.showLoadingOverlay('Processing...', 'Submitting withdrawal request');
+
+                // Create withdrawal request in Firestore
+                const { addDoc, collection, serverTimestamp, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+                const db = window.firebaseDb;
+
+                if (!db) {
+                    throw new Error('Firestore database not initialized. Please refresh the page.');
+                }
+
+                await addDoc(collection(db, 'withdrawals'), {
+                    userId: user.uid,
+                    userEmail: user.email,
+                    userName: profile.displayName || user.displayName || '',
+                    phoneNumber: profile.phoneNumber, // M-Pesa number
+                    phone: profile.phoneNumber,       // Admin dashboard compat
+                    referrerPhone: profile.phoneNumber, // Admin dashboard compat
+                    amount: pendingAmount,
+                    status: 'pending',
+                    createdAt: serverTimestamp(),
+                    referralCode: profile.referralCode || null
+                });
+
+                // Reset user's pending amount
+                const userRef = doc(db, 'users', user.uid);
+                await updateDoc(userRef, {
+                    referralPending: 0
+                });
+
+                // Also update the referralCodes collection if exists
+                if (profile.referralCode) {
+                    try {
+                        const codeRef = doc(db, 'referralCodes', profile.referralCode);
+                        await updateDoc(codeRef, {
+                            pendingPayout: 0
+                        });
+                    } catch (e) {
+                        // Code might not exist in collection, ignore
+                    }
+                }
+
+                window.firebaseAuth.showSuccessOverlay('Request Submitted!', 'You will receive your funds via M-Pesa within 24-48 hours', 3000);
+
+                // Update local profile and UI
+                profile.referralPending = 0;
+                setTimeout(() => {
+                    document.getElementById('statPending').textContent = 'KES 0';
+                    updateWithdrawalButton(0, profile.phoneNumber);
+                }, 3000);
+
+            } catch (error) {
+                console.error('Withdrawal error:', error);
+                window.firebaseAuth.hideLoadingOverlay();
+                showToast('Error submitting withdrawal. Please try again.', 'error');
+            }
+        }
+
+        // Wait for Firebase Auth to initialize
+        function initReferralPage() {
+            if (window.firebaseAuth && window.firebaseAuth.initialized) {
+                window.firebaseAuth.onAuthStateChange(updateViewForUser);
+            } else {
+                setTimeout(initReferralPage, 100);
+            }
+        }
+
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initReferralPage);
+    </script>
+    <!-- WhatsApp Floating CTAs -->
+    <div class="wa-floating-container">
+        <a href="https://chat.whatsapp.com/IiipHgYt5yHL6n126NAKBX" target="_blank" class="wa-fab wa-fab-group"
+            title="Join WhatsApp Group">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp Group</span>
+        </a>
+        <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank" class="wa-fab wa-fab-channel"
+            title="Follow WhatsApp Channel">
+            <i class="fas fa-bell"></i>
+            <span>WhatsApp Channel</span>
+        </a>
+    </div>
+    </div>
+    </div>
+
+    <!-- Authentication Modals removed in favor of dynamic injection from auth-ui.js -->
+
+    <script>
+        // Use global handlers from assets/js/auth-handlers.js
+        // Additional page-specific initialization if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            // Re-sync name display periodically or on state change is handled by auth-handlers.js
+        });
+    </script>
+</body>
+
+</html>
