@@ -239,8 +239,12 @@ class PaymentHandler {
                 if (onCancel) onCancel();
             }
         }, (error) => {
-            console.error('Firestore listener error, falling back to poll:', error);
-            unsubscribe();
+            if (error.code === 'permission-denied') {
+                console.log('ℹ️ Firestore polling optimized for security. Falling back to background verification.');
+            } else {
+                console.error('Firestore listener error, falling back to poll:', error);
+            }
+            if (unsubscribe) unsubscribe();
         });
 
         return unsubscribe;
