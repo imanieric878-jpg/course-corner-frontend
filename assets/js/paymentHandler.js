@@ -1070,6 +1070,108 @@ class PaymentHandler {
             }
         }
     }
+
+    // Verify payment using M-Pesa receipt code entered by the user
+    async verifyExistingPayment(phoneNumber, category, onSuccess) {
+        const { value: mpesaCode } = await Swal.fire({
+            title: 'Enter M-Pesa Code',
+            html: `
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                    Enter the M-Pesa confirmation code from your SMS (e.g. <strong>QGJ4K7LMSN</strong>)
+                </p>
+                <input id="mpesa-code-input" class="swal2-input" placeholder="e.g. QGJ4K7LMSN"
+                    style="text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem; font-weight: 600;"
+                    maxlength="12">
+            `,
+            confirmButtonText: 'Verify',
+            confirmButtonColor: '#16a34a',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            focusConfirm: false,
+            preConfirm: () => {
+                const code = document.getElementById('mpesa-code-input')?.value?.trim().toUpperCase();
+                if (!code || code.length < 6) {
+                    Swal.showValidationMessage('Please enter a valid M-Pesa code');
+                    return false;
+                }
+                return code;
+            }
+        });
+
+        if (!mpesaCode) return; // User cancelled
+
+        // Show loading
+        Swal.fire({
+            title: 'Verifying...',
+            html: '<p>Checking your M-Pesa code with the system...</p>',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            const response = await fetch(`${this.serverUrl}/mpesa/verify-mpesa-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mpesaCode, category })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.data?.status === 'completed') {
+                this.isPaymentCompleted = true;
+
+                if (window.firebaseAuth && window.firebaseAuth.showSuccessOverlay) {
+                    window.firebaseAuth.showSuccessOverlay(
+                        'Payment Verified!',
+                        `Code: <b>${mpesaCode}</b><br>Loading your results...`,
+                        3000
+                    );
+                } else {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Payment Verified!',
+                        html: `<p>Code <b>${mpesaCode}</b> confirmed. Loading your results...</p>`,
+                        timer: 2500,
+                        showConfirmButton: false,
+                        timerProgressBar: true
+                    });
+                }
+
+                setTimeout(() => {
+                    if (onSuccess && typeof onSuccess === 'function') onSuccess();
+                }, 3000);
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Code Not Found',
+                    html: `
+                        <p>We could not find a completed payment for code <strong>${mpesaCode}</strong>.</p>
+                        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: #6b7280;">
+                            If you just paid, it may take 30–60 seconds for the system to update. Please try again shortly.
+                        </p>
+                    `,
+                    confirmButtonText: 'Try Again',
+                    confirmButtonColor: '#16a34a',
+                    showCancelButton: true,
+                    cancelButtonText: 'Close'
+                }).then(retry => {
+                    if (retry.isConfirmed) {
+                        this.verifyExistingPayment(phoneNumber, category, onSuccess);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Manual verification error:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Verification Error',
+                text: 'Could not connect to the server. Please try again.',
+                confirmButtonColor: '#16a34a'
+            });
+        }
+    }
 }
 
 // Make PaymentHandler globally available
