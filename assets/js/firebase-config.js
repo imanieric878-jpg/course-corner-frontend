@@ -4,7 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp, Timestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -107,7 +107,8 @@ window.firebaseFirestore = {
     increment,
     serverTimestamp,
     Timestamp,
-    collection
+    collection,
+    onSnapshot
 };
 window.firebaseTrackEvent = trackEvent;
 window.firebaseSavePayment = savePaymentRecord;
