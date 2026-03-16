@@ -208,6 +208,44 @@ class PaymentHandler {
         return { success: false, status: 'pending', timedOut: true };
     }
 
+    // Real-time Firestore listener for payment status (replaces HTTP polling)
+    // Fires instantly when Safaricom callback updates the DB — no polling lag
+    listenToPaymentStatus(onStatusUpdate, onComplete, onFail, onCancel) {
+        const id = this.checkoutRequestId || localStorage.getItem('paymentCheckoutRequestId');
+        if (!id || !window.firebaseFirestore || !window.firebaseDb) {
+            console.warn('⚠️ Firestore not available, falling back to HTTP poll');
+            return null;
+        }
+
+        const { doc, onSnapshot } = window.firebaseFirestore;
+        const paymentRef = doc(window.firebaseDb, 'payments', id);
+
+        const unsubscribe = onSnapshot(paymentRef, (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
+            const status = data.status;
+
+            if (onStatusUpdate) onStatusUpdate(status);
+
+            if (status === 'completed') {
+                unsubscribe();
+                this.isPaymentCompleted = true;
+                onComplete(data);
+            } else if (status === 'failed') {
+                unsubscribe();
+                onFail(data, this.getMpesaErrorMessage(data.resultDesc || ''));
+            } else if (status === 'cancelled') {
+                unsubscribe();
+                if (onCancel) onCancel();
+            }
+        }, (error) => {
+            console.error('Firestore listener error, falling back to poll:', error);
+            unsubscribe();
+        });
+
+        return unsubscribe;
+    }
+
     // Manually verify payment status (for when polling times out)
     async verifyPaymentManually() {
         if (!this.sessionId) {
@@ -568,6 +606,13 @@ class PaymentHandler {
         return { success: false };
     }
 
+    // Pre-warm Vercel backend to eliminate cold-start delay during payment
+    wakeUpBackend() {
+        fetch(`${this.serverUrl}/ping`, { method: 'GET', cache: 'no-store' })
+            .then(() => console.log('✅ Backend warmed up'))
+            .catch(() => {}); // Silent fail — this is best-effort
+    }
+
     // Full payment flow with UI - processPayment wrapper
     async processPayment(category, amount, onSuccess) {
         try {
@@ -591,11 +636,13 @@ class PaymentHandler {
                 localStorage.setItem('pendingReferralCode', urlRefCode);
             }
 
-            // Prompt for phone number with referral code option
+            // Pre-warm backend the moment payment modal opens (before user presses Pay)
+            // This eliminates Vercel cold-start delay from the critical payment path
             const { value: formData, isDenied } = await Swal.fire({
                 title: '📱 M-Pesa Payment',
                 width: window.innerWidth > 768 ? '850px' : '98%',
                 padding: window.innerWidth > 768 ? '1.25rem' : '0.5rem',
+                didOpen: () => this.wakeUpBackend(),
                 html: `
                     <div style="text-align: left; margin-top: 0.5rem;">
                         <div style="margin-bottom: 0.75rem;">
@@ -686,6 +733,10 @@ class PaymentHandler {
                 didOpen: () => Swal.showLoading()
             });
 
+            // Pre-warm the backend in parallel with showing the loading screen
+            this.wakeUpBackend();
+
+
             if (referralCode) {
                 console.log('📌 Applying referral code:', referralCode);
             }
@@ -766,26 +817,53 @@ class PaymentHandler {
                 // ignore
             }
 
-            // Poll for payment status
-            const pollOnce = async () => {
-                // Add a small initial delay to allow STK push to reach the user
-                await new Promise(r => setTimeout(r, 2000));
-                
-                return await this.pollPaymentStatus(20, 2000, (status, attempt, max) => {
-                    const statusEl = document.getElementById('paymentStatus');
-                    if (statusEl) {
-                        statusEl.innerHTML = `
-                        <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Verifying payment (${attempt}/${max})...
-                    `;
-                    }
-                }, { shouldStop: () => userCancelled, requestTimeoutMs: 10000 });
-            };
+            // Use Firestore real-time listener for instant confirmation
+            // Falls back to HTTP polling if Firestore is unavailable
+            const result = await new Promise((resolve) => {
+                const statusEl = document.getElementById('paymentStatus');
 
-            let result = await pollOnce();
+                // Try real-time Firestore listener first
+                const unsubscribe = this.listenToPaymentStatus(
+                    // onStatusUpdate
+                    (status) => {
+                        if (statusEl) {
+                            statusEl.innerHTML = `
+                            <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Waiting for M-Pesa confirmation...
+                        `;}
+                    },
+                    // onComplete
+                    (data) => resolve({ success: true, status: 'completed', data }),
+                    // onFail
+                    (data, msg) => resolve({ success: false, status: 'failed', error: msg, data }),
+                    // onCancel
+                    () => resolve({ success: false, status: 'cancelled' })
+                );
+
+                // If Firestore listener unavailable, fall back to HTTP polling
+                if (!unsubscribe) {
+                    this.pollPaymentStatus(20, 1500, (status, attempt, max) => {
+                        if (statusEl) {
+                            statusEl.innerHTML = `
+                            <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Verifying payment (${attempt}/${max})...
+                        `;}
+                    }, { shouldStop: () => userCancelled, requestTimeoutMs: 10000 })
+                    .then(resolve);
+                }
+
+                // Safety timeout: 90 seconds max wait
+                setTimeout(() => {
+                    if (unsubscribe) unsubscribe();
+                    resolve({ success: false, status: 'pending', timedOut: true });
+                }, 90000);
+            });
 
             if (result.status === 'cancelled') {
                 Swal.close();
