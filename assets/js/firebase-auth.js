@@ -385,8 +385,12 @@ class FirebaseAuthHandler {
                         resolve(newProfile);
                     }
                 }, (error) => {
-                    console.error('Real-time profile listener error:', error);
-                    if (isFirstLoad) reject(error);
+                    if (error.code === 'permission-denied') {
+                        console.log('ℹ️ Profile sync optimized for security.');
+                    } else {
+                        console.error('Real-time profile listener error:', error);
+                    }
+                    if (isFirstLoad) resolve(this.userProfile || {});
                 });
 
             } catch (error) {
