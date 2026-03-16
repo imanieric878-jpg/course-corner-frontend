@@ -231,6 +231,13 @@ class FirebaseAuthHandler {
         this.showLoadingOverlay('Signing out...', '');
         try {
             const { signOut } = this.firebaseFunctions;
+            
+            // Unsubscribe from real-time profile listener before signing out
+            if (this.profileListenerUnsubscribe) {
+                this.profileListenerUnsubscribe();
+                this.profileListenerUnsubscribe = null;
+            }
+
             await signOut(this.auth);
             
             // Clear local state immediately for better responsiveness
@@ -241,6 +248,7 @@ class FirebaseAuthHandler {
 
             this.showSuccessOverlay('Goodbye!', 'You have been signed out', 1500);
             return { success: true };
+
         } catch (error) {
             console.error('Sign out error:', error);
             this.hideLoadingOverlay();
@@ -339,29 +347,55 @@ class FirebaseAuthHandler {
     }
 
     /**
-     * Load user profile from Firestore
+     * Load user profile from Firestore with real-time updates
      */
     async loadUserProfile(additionalData = {}) {
         if (!this.currentUser) return null;
 
-        try {
-            const { doc, getDoc } = this.firebaseFunctions;
-            const userRef = doc(this.db, 'users', this.currentUser.uid);
-            const docSnap = await getDoc(userRef);
+        return new Promise((resolve, reject) => {
+            try {
+                const { doc, onSnapshot } = this.firebaseFunctions;
+                const userRef = doc(this.db, 'users', this.currentUser.uid);
 
-            if (docSnap.exists()) {
-                this.userProfile = docSnap.data();
-                return this.userProfile;
-            } else {
-                // Create profile if it doesn't exist (e.g. first Google sign-in)
-                return await this.createUserProfile(this.currentUser, additionalData);
+                // Unsubscribe from previous listener if it exists
+                if (this.profileListenerUnsubscribe) {
+                    this.profileListenerUnsubscribe();
+                }
+
+                let isFirstLoad = true;
+
+                this.profileListenerUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+                    if (docSnap.exists()) {
+                        this.userProfile = docSnap.data();
+                        
+                        // If this is an update (not the first load), force UI refresh
+                        if (!isFirstLoad) {
+                            this.updateUIForLoggedInUser();
+                            this.authStateListeners.forEach(listener => listener(this.currentUser));
+                        }
+                        
+                        if (isFirstLoad) {
+                            isFirstLoad = false;
+                            resolve(this.userProfile);
+                        }
+                    } else if (isFirstLoad) {
+                        // Create profile if it doesn't exist (e.g. first Google sign-in)
+                        isFirstLoad = false;
+                        const newProfile = await this.createUserProfile(this.currentUser, additionalData);
+                        resolve(newProfile);
+                    }
+                }, (error) => {
+                    console.error('Real-time profile listener error:', error);
+                    if (isFirstLoad) reject(error);
+                });
+
+            } catch (error) {
+                console.error('Error setting up profile listener:', error);
+                resolve(null);
             }
-
-        } catch (error) {
-            console.error('Error loading user profile:', error);
-            return null;
-        }
+        });
     }
+
 
     /**
      * Update user profile in Firestore
