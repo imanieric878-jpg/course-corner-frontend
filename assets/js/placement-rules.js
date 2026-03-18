@@ -18,7 +18,7 @@ const PlacementRules = {
         'english': ['ENGLISH', 'ENG'],
         'kiswahili': ['KISWAHILI', 'KIS', 'KISW'],
         'biology': ['BIOLOGY', 'BIO'],
-        'physics': ['PHYSICS', 'PHY'],
+        'physics': ['PHYSICS', 'PHY', 'PHYC'],
         'chemistry': ['CHEMISTRY', 'CHE', 'CHEM'],
         'geography': ['GEOGRAPHY', 'GEO'],
         'history': ['HISTORY', 'HIS', 'HAG', 'HISTORY & GOVT'],
@@ -86,7 +86,12 @@ const PlacementRules = {
 
         // Student must meet AT LEAST ONE of the alternatives
         return alternatives.some(alt => {
-            const trimmed = alt.trim().toUpperCase();
+            let trimmed = alt.trim().toUpperCase();
+
+            // Handle "ANY " prefix (e.g., "ANY GROUP2" or "ANY PHYC")
+            if (trimmed.startsWith('ANY ')) {
+                trimmed = trimmed.substring(4).trim();
+            }
 
             // Check if it's a GROUP reference (e.g., GROUP2)
             if (trimmed.startsWith('GROUP')) {
