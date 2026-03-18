@@ -15,7 +15,7 @@
         'english': { code: 'ENG', aliases: ['ENGLISH', 'ENG', 'English'] },
         'kiswahili': { code: 'KIS', aliases: ['KISWAHILI', 'KIS', 'Kiswahili'] },
         'biology': { code: 'BIO', aliases: ['BIOLOGY', 'BIO', 'Biology'] },
-        'physics': { code: 'PHY', aliases: ['PHYSICS', 'PHY', 'Physics'] },
+        'physics': { code: 'PHY', aliases: ['PHYSICS', 'PHY', 'Physics', 'PHYC'] },
         'chemistry': { code: 'CHE', aliases: ['CHEMISTRY', 'CHE', 'Chemistry'] },
         'geography': { code: 'GEO', aliases: ['GEOGRAPHY', 'GEO', 'Geography'] },
         'history': { code: 'HIS', aliases: ['HISTORY', 'HIS', 'History', 'HAG', 'History & Govt'] },
@@ -84,10 +84,10 @@
     const basePath = getBasePath();
 
     Promise.all([
-        fetch(`${basePath}assets/data/courses.json`).then(response => response.json()),
-        fetch(`${basePath}assets/data/diploma.json`).then(response => response.json()),
-        fetch(`${basePath}assets/data/dip.json`).then(response => response.json()),
-        window.PlacementEngine ? window.PlacementEngine.init() : Promise.resolve()
+        fetch(`assets/data/courses.json`).then(response => { if(!response.ok) throw new Error("courses.json " + response.status); return response.json(); }),
+        fetch(`assets/data/diploma.json`).then(response => { if(!response.ok) throw new Error("diploma.json " + response.status); return response.json(); }),
+        fetch(`assets/data/dip.json`).then(response => { if(!response.ok) throw new Error("dip.json " + response.status); return response.json(); }),
+        window.CampusPlacementEngine ? window.CampusPlacementEngine.init() : Promise.resolve()
     ])
         .then(([courses, diploma, technical]) => {
             coursesData = courses;
@@ -104,7 +104,12 @@
     // Helper function to find HTML ID for a subject name/code from JSON
     function findSubjectId(name) {
         if (!name) return null;
-        const normalizedName = name.trim().toUpperCase();
+        let normalizedName = name.trim().toUpperCase();
+
+        // Handle "ANY " prefix
+        if (normalizedName.startsWith('ANY ')) {
+            normalizedName = normalizedName.substring(4).trim();
+        }
 
         // Check codes and aliases
         for (const [id, data] of Object.entries(SUBJECT_MAPPING)) {
@@ -221,14 +226,26 @@
         return true;
     }
 
-    // Check alternative subjects with tracking (e.g., "MAT/PHY/BIO")
+    // Check alternative subjects with tracking (e.g., "MAT/PHY/BIO" or "MAT/GROUP2")
     function checkAlternativeSubjectsWithTracking(subjects, grades, minGrade, usedSubjects) {
         const alternatives = subjects.split('/');
-        for (const subject of alternatives) {
-            const htmlId = findSubjectId(subject);
-            if (htmlId && grades[htmlId] && !usedSubjects.has(htmlId)) {
-                if (!minGrade || meetsGradeRequirement(grades[htmlId], minGrade)) {
-                    return { met: true, subject: htmlId };
+        for (let subject of alternatives) {
+            subject = subject.trim().toUpperCase();
+            
+            // Handle "ANY " prefix
+            if (subject.startsWith('ANY ')) {
+                subject = subject.substring(4).trim();
+            }
+
+            if (subject.startsWith('GROUP')) {
+                const result = checkGroupRequirementWithTracking(subject, grades, minGrade, usedSubjects);
+                if (result.met) return result;
+            } else {
+                const htmlId = findSubjectId(subject);
+                if (htmlId && grades[htmlId] && !usedSubjects.has(htmlId)) {
+                    if (!minGrade || meetsGradeRequirement(grades[htmlId], minGrade)) {
+                        return { met: true, subject: htmlId };
+                    }
                 }
             }
         }
@@ -1384,69 +1401,104 @@
                 y += 10;
             }
 
-            // 3. Eligible Programs
-            if (window.lastPackageType === 'courses-only' || window.lastPackageType === 'combined') {
+            // 3. Eligible Programs (always include for any paid package)
+            const COURSE_PACKAGE_TYPES = ['courses-only', 'combined', 'point-and-courses', 'bronze', 'silver', 'gold'];
+            if (COURSE_PACKAGE_TYPES.includes(window.lastPackageType) || !window.lastPackageType) {
                 const universityResults = getEligibleCourses(gradesSnapshot);
                 const technicalResults = getTechnicalCourses(gradesSnapshot);
 
-                y = checkPage(pdf, y, 40);
-                pdf.setFontSize(16);
-                pdf.setTextColor(...THEME.secondary);
-                pdf.setFont(undefined, 'bold');
-                pdf.text('Eligible Academic Programs', 15, y);
-                y += 8;
+                // Check for data loading errors
+                if (universityResults && universityResults.error) {
+                    y = checkPage(pdf, y, 30);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(220, 38, 38); // Red for error
+                    pdf.text(`[WARNING]: ${universityResults.error}`, 20, y);
+                    y += 7;
+                    pdf.setTextColor(128, 128, 128); // Back to gray
+                    pdf.text("Please ensure you have a stable internet connection and refresh the page.", 20, y);
+                    y += 10;
+                }
 
                 const allCategories = {
-                    ...(universityResults.courses || {}),
-                    ...(technicalResults.courses || {})
+                    ...((universityResults && universityResults.courses) || {}),
+                    ...((technicalResults && technicalResults.courses) || {})
                 };
 
-                Object.entries(allCategories).forEach(([cat, data]) => {
-                    y = checkPage(pdf, y, 35);
-                    pdf.setFontSize(11);
-                    pdf.setTextColor(...THEME.primary);
+                const categoryKeys = Object.keys(allCategories);
+                if (categoryKeys.length > 0) {
+                    y = checkPage(pdf, y, 40);
+                    pdf.setFontSize(16);
+                    pdf.setTextColor(...THEME.secondary);
                     pdf.setFont(undefined, 'bold');
-                    pdf.text(cat, 15, y);
-                    y += 6;
+                    pdf.text('Eligible Academic Programs', 20, y);
+                    pdf.setDrawColor(...THEME.secondary);
+                    pdf.line(20, y + 2, 80, y + 2);
+                    y += 10;
 
-                    pdf.setFontSize(9);
-                    pdf.setTextColor(...THEME.dark);
-                    pdf.setFont(undefined, 'normal');
+                    categoryKeys.forEach(cat => {
+                        const data = allCategories[cat];
+                        if (!data) return;
 
-                    if (Array.isArray(data) && typeof data[0] === 'string') {
-                        data.forEach(p => {
-                            y = checkPage(pdf, y);
-                            pdf.setTextColor(...THEME.primary);
-                            pdf.text('•', 20, y);
-                            pdf.setTextColor(...THEME.dark);
-                            pdf.text(p, 24, y);
-                            y += 5;
-                        });
-                    } else if (data.map) {
-                        data.forEach(sub => {
-                            y = checkPage(pdf, y, 25);
-                            pdf.setFont(undefined, 'italic');
-                            pdf.setTextColor(...THEME.secondary);
-                            pdf.text(sub.category.replace(/\s*-\s*Subcat\s*\d+/g, ''), 20, y);
-                            y += 5;
-                            pdf.setFont(undefined, 'normal');
-                            pdf.setTextColor(...THEME.dark);
+                        y = checkPage(pdf, y, 35);
+                        pdf.setFontSize(12);
+                        pdf.setTextColor(...THEME.primary);
+                        pdf.setFont(undefined, 'bold');
+                        pdf.text(cat.replace('|', ' - '), 15, y);
+                        y += 6;
 
-                            if (sub.programs) {
-                                sub.programs.forEach(p => {
+                        pdf.setFontSize(9);
+                        pdf.setTextColor(...THEME.dark);
+                        pdf.setFont(undefined, 'normal');
+
+                        if (Array.isArray(data) && typeof data[0] === 'string') {
+                            data.forEach(p => {
+                                y = checkPage(pdf, y);
+                                pdf.setTextColor(...THEME.primary);
+                                pdf.text('•', 20, y);
+                                pdf.setTextColor(...THEME.dark);
+                                pdf.text(p, 24, y);
+                                y += 5;
+                            });
+                        } else if (Array.isArray(data)) {
+                            data.forEach(sub => {
+                                y = checkPage(pdf, y, 25);
+                                if (sub.category) {
+                                    pdf.setFont(undefined, 'italic');
+                                    pdf.setTextColor(...THEME.secondary);
+                                    pdf.text(sub.category.replace(/\s*-\s*Subcat\s*\d+/g, ''), 20, y);
+                                    y += 5;
+                                }
+                                pdf.setFont(undefined, 'normal');
+                                pdf.setTextColor(...THEME.dark);
+
+                                if (sub.programs) {
+                                    sub.programs.forEach(p => {
+                                        y = checkPage(pdf, y);
+                                        pdf.setTextColor(...THEME.primary);
+                                        pdf.text('•', 20, y);
+                                        pdf.setTextColor(...THEME.dark);
+                                        pdf.text(p, 24, y);
+                                        y += 5;
+                                    });
+                                } else if (typeof sub === 'string') {
                                     y = checkPage(pdf, y);
                                     pdf.setTextColor(...THEME.primary);
-                                    pdf.text('•', 25, y);
+                                    pdf.text('•', 20, y);
                                     pdf.setTextColor(...THEME.dark);
-                                    pdf.text(p, 29, y);
-                                    y += 4.5;
-                                });
-                            }
-                            y += 2;
-                        });
-                    }
-                    y += 4;
-                });
+                                    pdf.text(sub, 24, y);
+                                    y += 5;
+                                }
+                            });
+                        }
+                        y += 5;
+                    });
+                } else if (!universityResults.error) {
+                    y = checkPage(pdf, y, 30);
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(...THEME.gray);
+                    pdf.text('No additional academic programs matches were found for these grades.', 15, y);
+                    y += 10;
+                }
             }
 
             addFooter(pdf);
@@ -1467,6 +1519,11 @@
         document.body.style.overflow = 'auto';
         document.body.style.paddingRight = '0px';
     }
+
+    // Export functions for global access
+    window.getStudentGrades = getStudentGrades;
+    window.getEligibleCourses = getEligibleCourses;
+    window.getTechnicalCourses = getTechnicalCourses;
 
     console.log('🏁 courses-eligibility.js: Script fully loaded');
 })(); // End of IIFE
