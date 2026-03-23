@@ -11,10 +11,10 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="assets/js/firebase-config.js" type="module"></script>
-    <script src="assets/js/calculator.js" defer></script>
-    <script src="assets/js/courses-eligibility.js" defer></script>
     <script src="assets/js/placement-rules.js" defer></script>
     <script src="assets/js/placement-engine.js" defer></script>
+    <script src="assets/js/calculator.js" defer></script>
+    <script src="assets/js/courses-eligibility.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1238,25 +1238,25 @@
                         <div class="cc-package-selector-hidden">
                             <select id="packageSelect" class="cc-package-select">
                                 <option value="" data-amount="0" data-description="">-- Choose a package --</option>
-                                <option value="gold" data-amount="299"
+                                <option value="gold" data-amount="599"
                                     data-description="Universities + Courses + Cluster Points + FREE Expert Guidance">⭐
-                                    Gold Package - KES 299 - Expert Consultation</option>
-                                <option value="silver" data-amount="249"
+                                    Gold Package - KES 599 - Expert Consultation</option>
+                                <option value="silver" data-amount="499"
                                     data-description="Universities + Courses + All 20 Cluster Points">🥈 Silver Package
-                                    - KES 249 - Cluster Points</option>
-                                <option value="bronze" data-amount="199"
+                                    - KES 499 - Cluster Points</option>
+                                <option value="bronze" data-amount="399"
                                     data-description="Universities & Courses You Qualify For">🥉 Bronze Package - KES
-                                    199
+                                    399
                                     - Universities & Courses</option>
-                                <option value="point-and-courses" data-amount="149"
+                                <option value="point-and-courses" data-amount="299"
                                     data-description="Cluster Points & Eligible Courses">📊 Premium - Points & Courses -
-                                    KES 149</option>
-                                <option value="courses-only" data-amount="99"
-                                    data-description="View Eligible Courses Only">📚 Standard - Courses Only - KES 99
+                                    KES 299</option>
+                                <option value="courses-only" data-amount="199"
+                                    data-description="View Eligible Courses Only">📚 Standard - Courses Only - KES 199
                                 </option>
-                                <option value="calculate-cluster-points" data-amount="49"
+                                <option value="calculate-cluster-points" data-amount="99"
                                     data-description="Calculate Your Cluster Points">📈 Starter - Cluster Points - KES
-                                    49</option>
+                                    99</option>
                             </select>
                             <button id="payButton" class="cc-btn-pay payment-btn" disabled data-category=""
                                 data-amount="0">
@@ -1311,11 +1311,11 @@
             <p class="wa-hub-description">Get instant updates on campus news, application deadlines, and expert career
                 guidance directly on your phone.</p>
             <div class="wa-hub-btns">
-                <a href="https://chat.whatsapp.com/BaStqIj8ATl8H29s81Hyhg?mode=hqctcla" target="_blank" class="btn-wa btn-wa-group">
+                <a href="https://wa.me/254704372636" target="_blank" class="btn-wa btn-wa-group">
                     <i class="fab fa-whatsapp"></i>
                     Join WhatsApp Group
                 </a>
-                <a href="https://whatsapp.com/channel/0029VbCRmXx4o7qENDBojU1c" target="_blank"
+                <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank"
                     class="btn-wa btn-wa-channel">
                     <i class="fas fa-bell"></i>
                     Follow WhatsApp Channel
@@ -2509,7 +2509,7 @@
                             </label>
                             <select id="modalPackageSelect" class="cc-package-select" style="width: 100%; padding: 0.6rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.95rem; cursor: pointer;">
                                 <option value="" data-amount="0">-- Choose a package --</option>
-                                <option value="gold" data-amount="299">⭐ Gold Package - KES 299</option>
+                                <option value="gold" data-amount="300">⭐ Gold Package - KES 300</option>
                                 <option value="silver" data-amount="249">🥈 Silver Package - KES 249</option>
                                 <option value="bronze" data-amount="199">🥉 Bronze Package - KES 199</option>
                                 <option value="point-and-courses" data-amount="149">📊 Premium - Points & Courses - KES 149</option>
@@ -2827,19 +2827,72 @@
                         const grades = window.getStudentGrades();
                         console.log('Student grades retrieved:', grades);
 
-                        if (typeof window.getEligibleCourses === 'function') {
-                            const eligibleCourses = window.getEligibleCourses(grades);
-                            console.log('Eligible courses retrieved:', eligibleCourses);
+                        // Determine if student is < C+
+                        let isBelowCPlus = false;
+                        if (typeof window.calculateClusterPoints === 'function') {
+                             const pts = window.calculateClusterPoints();
+                             // A mean grade below C+ typically corresponds to < 46 points overall usually,
+                             // or we can infer it if they have no eligible degree courses.
+                             // But checking standard grades for < C+ is best.
+                             // We'll calculate a fast rough mean points check
+                            const sum = Object.values(pts).reduce((a,b)=>a+b, 0);
+                            const count = Object.keys(pts).length;
+                            const avg = sum / count;
+                            if (avg < 46) isBelowCPlus = true;
+                        }
+
+                        if (isBelowCPlus) {
+                            console.log('Student is below C+. Showing Diploma/Certificate/KMTC results.');
+                            let combinedResults = { courses: {} };
+                            
+                            // 1. Get KMTC Diplomas
+                            if (typeof window.getDiplomaCourses === 'function') {
+                                const kmtc = window.getDiplomaCourses(grades);
+                                if (kmtc['KMTC Diploma Programs']) {
+                                    combinedResults.courses['KMTC Diploma Programs'] = [
+                                        {
+                                            group: 'KMTC Diploma Programs',
+                                            programs: kmtc['KMTC Diploma Programs']
+                                        }
+                                    ];
+                                }
+                            }
+
+                            // 2. Get TVET/Technical Diplomas and Certificates
+                            if (typeof window.getTechnicalCourses === 'function') {
+                                const tech = window.getTechnicalCourses(grades);
+                                if (tech && tech.courses) {
+                                    Object.assign(combinedResults.courses, tech.courses);
+                                }
+                            }
 
                             if (typeof window.displayAllResults === 'function') {
-                                console.log('Calling displayAllResults...');
-                                window.displayAllResults(eligibleCourses);
+                                console.log('Calling displayAllResults for Diploma/Certificates...');
+                                // We need to mock the structure so displayAllResults knows how to handle it,
+                                // or we can pass it as a special structure.
+                                // Actually, displayAllResults in original code expects { courses: { [category]: [{group, programs}] } }
+                                // `getEligibleCourses` returns exactly this format. `combinedResults` is built to match.
+                                window.displayAllResults(combinedResults);
                                 console.log('displayAllResults completed');
                             } else {
                                 console.error('window.displayAllResults is not a function');
                             }
+
                         } else {
-                            console.error('window.getEligibleCourses is not a function');
+                            if (typeof window.getEligibleCourses === 'function') {
+                                const eligibleCourses = window.getEligibleCourses(grades);
+                                console.log('Eligible courses retrieved:', eligibleCourses);
+
+                                if (typeof window.displayAllResults === 'function') {
+                                    console.log('Calling displayAllResults...');
+                                    window.displayAllResults(eligibleCourses);
+                                    console.log('displayAllResults completed');
+                                } else {
+                                    console.error('window.displayAllResults is not a function');
+                                }
+                            } else {
+                                console.error('window.getEligibleCourses is not a function');
+                            }
                         }
                     } else {
                         console.error('window.getStudentGrades is not a function');
@@ -3509,8 +3562,86 @@
                 }
 
                 // ===== QUALIFIED UNIVERSITIES =====
+                if (window.CampusPlacementEngine && !window.CampusPlacementEngine._initialized) {
+                    await window.CampusPlacementEngine.init();
+                }
+
                 const grades = window.getStudentGrades ? window.getStudentGrades() : {};
                 const points = window.lastClusterPoints || (window.calculateClusterPoints ? window.calculateClusterPoints() : {});
+
+                // ===== ELIGIBLE ACADEMIC PROGRAMS SECTION =====
+                y = checkNewPage(y, 40);
+                pdf.setFontSize(16);
+                pdf.setTextColor(...THEME.secondary);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Eligible Academic Programs', 15, y);
+                y += 8;
+
+                const eligibleCourses = window.getEligibleCourses ? window.getEligibleCourses(grades) : { courses: {} };
+                const technicalCourses = window.getTechnicalCourses ? window.getTechnicalCourses(grades) : { courses: {} };
+
+                const allCategories = {
+                    ...(eligibleCourses.courses || {}),
+                    ...(technicalCourses.courses || {})
+                };
+
+                let categoryFound = false;
+                Object.entries(allCategories).forEach(([cat, data]) => {
+                    categoryFound = true;
+                    y = checkNewPage(y, 25);
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(...THEME.primary);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text(cat, 15, y);
+                    y += 6;
+
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(...THEME.dark);
+                    pdf.setFont(undefined, 'normal');
+
+                    if (Array.isArray(data) && typeof data[0] === 'string') {
+                        data.forEach(p => {
+                            y = checkNewPage(y, 6);
+                            pdf.setTextColor(...THEME.primary);
+                            pdf.text('•', 20, y);
+                            pdf.setTextColor(...THEME.dark);
+                            pdf.text(p, 24, y);
+                            y += 5;
+                        });
+                    } else if (data.map) {
+                        data.forEach(sub => {
+                            y = checkNewPage(y, 15);
+                            pdf.setFont(undefined, 'italic');
+                            pdf.setTextColor(...THEME.secondary);
+                            pdf.text(sub.category.replace(/\s*-\s*Subcat\s*\d+/g, ''), 20, y);
+                            y += 5;
+                            pdf.setFont(undefined, 'normal');
+                            pdf.setTextColor(...THEME.dark);
+
+                            if (sub.programs) {
+                                sub.programs.forEach(p => {
+                                    y = checkNewPage(y, 6);
+                                    pdf.setTextColor(...THEME.primary);
+                                    pdf.text('•', 25, y);
+                                    pdf.setTextColor(...THEME.dark);
+                                    pdf.text(p, 29, y);
+                                    y += 4.5;
+                                });
+                            }
+                            y += 2;
+                        });
+                    }
+                    y += 4;
+                });
+
+                if (!categoryFound) {
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(...THEME.gray);
+                    pdf.text('No eligible degree, diploma, or certificate programs found.', 20, y);
+                    y += 10;
+                }
+
+                y += 10;
 
                 let universities = window.lastUniversities || [];
                 if (universities.length === 0 && window.CampusPlacementEngine && window.CampusPlacementEngine._initialized) {
@@ -4019,9 +4150,7 @@
                     <h4>Contact Us</h4>
                     <ul>
                         <li><i class="fas fa-envelope"></i> imanieric878@gmail.com</li>
-                        <li><i class="fas fa-phone"></i> 0704 372 636</li>
-                        <li><i class="fas fa-phone"></i> 0717 353 073</li>
-                        <li><i class="fas fa-phone"></i> 0713 581 357</li>
+                        <li><i class="fas fa-phone"></i> 0704372636</li>
                     </ul>
                 </div>
             </div>
@@ -4044,12 +4173,12 @@
     </a>
     <!-- WhatsApp Floating CTAs -->
     <div class="wa-floating-container">
-        <a href="https://chat.whatsapp.com/BaStqIj8ATl8H29s81Hyhg?mode=hqctcla" target="_blank" class="wa-fab wa-fab-group"
+        <a href="https://wa.me/254704372636" target="_blank" class="wa-fab wa-fab-group"
             title="Join WhatsApp Group">
             <i class="fab fa-whatsapp"></i>
             <span>WhatsApp Group</span>
         </a>
-        <a href="https://whatsapp.com/channel/0029VbCRmXx4o7qENDBojU1c" target="_blank" class="wa-fab wa-fab-channel"
+        <a href="https://whatsapp.com/channel/0029VbBSAavDzgT8eGdkEW0a" target="_blank" class="wa-fab wa-fab-channel"
             title="Follow WhatsApp Channel">
             <i class="fas fa-bell"></i>
             <span>WhatsApp Channel</span>
