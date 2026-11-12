@@ -1147,7 +1147,8 @@ class PaymentHandler {
             });
         }
     }
-}
+
+
 
 
     // Built-in Full Screen UI Overlays (No Firebase Required)
@@ -1200,6 +1201,7 @@ class PaymentHandler {
             document.body.style.overflow = '';
         }, duration);
     }
+}
 
 // Make PaymentHandler globally available
 window.PaymentHandler = PaymentHandler;
