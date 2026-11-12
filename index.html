@@ -1592,9 +1592,13 @@
         // ===== UNIFIED PAYMENT FLOW =====
         const SERVER_URL = 'https://course-corner-backend.vercel.app/api';
 
-        // Create single payment handler instance
-        if (!window.paymentHandler) {
-            window.paymentHandler = new PaymentHandler(SERVER_URL);
+        // Create single payment handler instance safely
+        try {
+            if (!window.paymentHandler && typeof PaymentHandler !== 'undefined') {
+                window.paymentHandler = new PaymentHandler(SERVER_URL);
+            }
+        } catch (e) {
+            console.warn('PaymentHandler deferred initialization:', e.message);
         }
 
         // Validate student subjects before payment
