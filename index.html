@@ -1242,7 +1242,7 @@
 
                         <!-- GET RESULTS BUTTON (Freemium Flow) -->
                         <div class="cc-get-results-wrapper">
-                            <button id="getResultsBtn" class="cc-btn-get-results" disabled>
+                            <button id="getResultsBtn" class="cc-btn-get-results" disabled onclick="if(!this.disabled) showTeaserResults()">
                                 <div class="cc-btn-content">
                                     <div class="cc-btn-icon">
                                         <i class="fas fa-chart-line"></i>
@@ -1948,7 +1948,8 @@
         }
 
         // Show teaser results (freemium flow)
-        async function showTeaserResults() {
+        window.showTeaserResults = async function showTeaserResults() {
+        console.log("showTeaserResults triggered");
             console.log('--- showTeaserResults ---');
 
             const resultsDiv = document.getElementById('results');
@@ -4016,15 +4017,7 @@
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('=== DOMContentLoaded fired ===');
 
-            // Wait for Firebase to be ready (it's initialized as a module)
-            const waitForFirebase = async (retries = 10) => {
-                if (window.firebaseDb) return true;
-                if (retries <= 0) return false;
-                await new Promise(r => setTimeout(r, 500));
-                return waitForFirebase(retries - 1);
-            };
-
-            await waitForFirebase();
+// Firebase wait removed - Instant readiness
 
             // Check for magic access first
             console.log('Checking for magic access...');
