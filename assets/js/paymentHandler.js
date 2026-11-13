@@ -56,16 +56,22 @@ class PaymentHandler {
                 throw new Error(data.message || 'Failed to initiate payment');
             }
 
-            // Store session ID and CheckoutRequestID
+            // Store session ID, CheckoutRequestID, and Paystack Authorization URL
             this.sessionId = data.data.sessionId;
             this.checkoutRequestId = data.data.checkoutRequestId;
+            this.authorizationUrl = data.data.authorizationUrl || null;
             localStorage.setItem('paymentSessionId', this.sessionId);
             localStorage.setItem('paymentCheckoutRequestId', this.checkoutRequestId);
-            console.log('Payment initiated. Session ID:', this.sessionId);
+            if (this.authorizationUrl) {
+                localStorage.setItem('paymentAuthUrl', this.authorizationUrl);
+            }
+            console.log('Payment initiated. Session ID:', this.sessionId, 'Auth URL:', this.authorizationUrl);
 
             return {
                 success: true,
                 sessionId: this.sessionId,
+                checkoutRequestId: this.checkoutRequestId,
+                authorizationUrl: this.authorizationUrl,
                 amount: data.data.amount,
                 category
             };
@@ -762,6 +768,16 @@ class PaymentHandler {
                             <p class="swal-price-text" style="font-weight: 700; color: #16a34a;">KES ${amount}</p>
                             <p style="font-size: 0.8rem; color: #166534;">Enter your M-Pesa PIN to complete</p>
                         </div>
+                        ${(initResult.authorizationUrl || this.authorizationUrl) ? `
+                            <div style="margin: 1rem 0 0.5rem;">
+                                <a href="${initResult.authorizationUrl || this.authorizationUrl}" target="_blank" style="display: block; background: #16a34a; color: white; padding: 12px 18px; border-radius: 8px; font-weight: 700; font-size: 1rem; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.4); text-align: center;">
+                                    📱 Click Here to Enter M-Pesa PIN
+                                </a>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; line-height: 1.3;">
+                                    If the PIN prompt did not pop up automatically, click the green button above to pay directly via Paystack.
+                                </p>
+                            </div>
+                        ` : ''}
                         <div id="paymentStatus" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #f9fafb; border-radius: 8px; color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">
                             <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -796,35 +812,43 @@ class PaymentHandler {
                 // ignore
             }
 
-            // Use Firestore real-time listener for instant confirmation
-            // Falls back to HTTP polling if Firestore is unavailable
-            const result = await new Promise((resolve) => {
-                const statusEl = document.getElementById('paymentStatus');
+            // Polling helper: listens to both Realtime and HTTP polling simultaneously
+            const pollOnce = () => {
+                return new Promise((resolve) => {
+                    const statusEl = document.getElementById('paymentStatus');
+                    let settled = false;
+                    let unsubscribe = null;
 
-                // Try real-time Firestore listener first
-                const unsubscribe = this.listenToPaymentStatus(
-                    // onStatusUpdate
-                    (status) => {
-                        if (statusEl) {
-                            statusEl.innerHTML = `
-                            <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Waiting for M-Pesa confirmation...
-                        `;}
-                    },
-                    // onComplete
-                    (data) => resolve({ success: true, status: 'completed', data }),
-                    // onFail
-                    (data, msg) => resolve({ success: false, status: 'failed', error: msg, data }),
-                    // onCancel
-                    () => resolve({ success: false, status: 'cancelled' })
-                );
+                    const finish = (val) => {
+                        if (!settled) {
+                            settled = true;
+                            if (unsubscribe && typeof unsubscribe === 'function') {
+                                try { unsubscribe(); } catch (err) {}
+                            }
+                            resolve(val);
+                        }
+                    };
 
-                // If Firestore listener unavailable, fall back to HTTP polling
-                if (!unsubscribe) {
-                    this.pollPaymentStatus(20, 1500, (status, attempt, max) => {
+                    // 1. Try real-time Supabase listener
+                    unsubscribe = this.listenToPaymentStatus(
+                        (status) => {
+                            if (statusEl) {
+                                statusEl.innerHTML = `
+                                <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Waiting for M-Pesa confirmation...
+                                `;
+                            }
+                        },
+                        (data) => finish({ success: true, status: 'completed', data }),
+                        (data, msg) => finish({ success: false, status: 'failed', error: msg, data }),
+                        () => finish({ success: false, status: 'cancelled' })
+                    );
+
+                    // 2. Concurrently run HTTP polling (guarantees updates even if WebSockets fail)
+                    this.pollPaymentStatus(25, 2000, (status, attempt, max) => {
                         if (statusEl) {
                             statusEl.innerHTML = `
                             <svg class="animate-spin" style="animation: spin 1s linear infinite; width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -832,17 +856,22 @@ class PaymentHandler {
                                 <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Verifying payment (${attempt}/${max})...
-                        `;}
+                            `;
+                        }
                     }, { shouldStop: () => userCancelled, requestTimeoutMs: 10000 })
-                    .then(resolve);
-                }
+                    .then(finish)
+                    .catch((err) => {
+                        console.warn('Poll error:', err);
+                    });
 
-                // Safety timeout: 90 seconds max wait
-                setTimeout(() => {
-                    if (unsubscribe) unsubscribe();
-                    resolve({ success: false, status: 'pending', timedOut: true });
-                }, 90000);
-            });
+                    // 3. Safety timeout after 50 seconds
+                    setTimeout(() => {
+                        finish({ success: false, status: 'pending', timedOut: true });
+                    }, 50000);
+                });
+            };
+
+            let result = await pollOnce();
 
             if (result.status === 'cancelled') {
                 Swal.close();
